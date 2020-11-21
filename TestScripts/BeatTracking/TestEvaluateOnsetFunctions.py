@@ -1,3 +1,4 @@
+from __future__ import print_function
 import numpy as np
 import sys, os
 import csv, time
@@ -19,11 +20,11 @@ try:
 		MAX_VALID_BPM = 190.0
 		
 except:
-	print "usage:", sys.argv[0], "<directory>"
+	print("usage:", sys.argv[0], "<directory>")
 	sys.exit()
 
 # Load the libraries
-print 'Loading Essentia...'
+print('Loading Essentia...')
 from essentia import *
 from essentia.standard import *
 import matplotlib.pyplot as plt
@@ -95,7 +96,7 @@ with open('./figures/evaluation_localmaxima'+timestr+'.csv', 'wb') as csvfile:
 	for f in os.listdir(directory):
 		if f.endswith(".mp3") or f.endswith('.wav'):
 			
-			print '============== ', f , ' =================='
+			print('============== ', f , ' ==================')
 			loader = essentia.standard.MonoLoader(filename = directory + '/' + f)
 			audio_orig = loader()
 			lowpass = LowPass(cutoffFrequency=1500)
@@ -118,7 +119,7 @@ with open('./figures/evaluation_localmaxima'+timestr+'.csv', 'wb') as csvfile:
 				#~ if os.path.exists('./figures/'+f+'.png'):
 					#~ continue
 					
-				print od_str				
+				print(od_str)				
 
 				error = False
 				

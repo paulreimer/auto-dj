@@ -2,6 +2,7 @@
 	A simple demo, used somewhere in the beginning of the project (first semester).
 	Annotates some audio with beats and downbeats and plays it back
 '''
+from __future__ import print_function
 
 import essentia
 from essentia import *
@@ -17,31 +18,31 @@ from downbeatTracker import *
 from BeatTracker import *
 
 if len(sys.argv) != 2:
-	print 'Usage : ', sys.argv[0], ' <filename>'
+	print('Usage : ', sys.argv[0], ' <filename>')
 	exit()
 
 filename = sys.argv[1]	
 essentia.log.infoActive = False
 # Load the audio
-print 'Loading audio...'
+print('Loading audio...')
 loader = MonoLoader(filename = filename)
 audio = loader()
 
 # Beat tracking
 
-print 'Extracting beat information...'
+print('Extracting beat information...')
 tracker = BeatTracker()
 tracker.run(audio)
 beats = tracker.getBeats()
 bpm = tracker.getBpm()
-print 'Bpm: ', bpm
+print('Bpm: ', bpm)
 
 
-print 'Extracting downbeat information...'
+print('Extracting downbeat information...')
 downbeatTracker = DownbeatTracker()
 downbeats = downbeatTracker.getDownbeats(audio, beats)
 
-print 'Annotating audio...'
+print('Annotating audio...')
 onsetMarker = AudioOnsetsMarker(onsets = beats, type='noise')
 audioMarked = onsetMarker(audio)
 onsetMarker2 = AudioOnsetsMarker(onsets = downbeats*1.0, type='beep')

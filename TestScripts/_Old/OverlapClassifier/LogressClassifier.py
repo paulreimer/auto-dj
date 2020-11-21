@@ -2,6 +2,7 @@
 	Script to train the quality model of downbeat segments.
 	Can also be copied to the Application directory and used to visualize accuracy over one song. Uncomment the necessary lines for that
 '''
+from __future__ import print_function
 
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
@@ -100,7 +101,7 @@ def train():
 				# Select the corresponding training samples
 				train_mask = [(song_labels[i] in song_labels_train) for i in range(len(song_labels))]
 				X_train = data[train_mask]
-				print X_train.shape
+				print(X_train.shape)
 				y_train = labels[train_mask]
 				X_val = data[np.logical_not(train_mask)]
 				y_val = labels[np.logical_not(train_mask)]
@@ -127,7 +128,7 @@ def train():
 				predicted = model.predict_proba(X_val_new)[:,1]
 				loss_val += log_loss(y_val, predicted)
 				#~ print 'Support vectors: ' + str(model.n_support_)
-				print '\tC = {:.2} gamma = {:.2} Train = {:.2}, {:.2} Val = {:.2}, {:.2}'.format(C, gamma, score_train/(cv_iter+1), loss_train/(cv_iter+1), score_val/(cv_iter+1), loss_val/(cv_iter+1)) 
+				print('\tC = {:.2} gamma = {:.2} Train = {:.2}, {:.2} Val = {:.2}, {:.2}'.format(C, gamma, score_train/(cv_iter+1), loss_train/(cv_iter+1), score_val/(cv_iter+1), loss_val/(cv_iter+1))) 
 				
 			# Printing
 			score_train = score_train / num_cv
@@ -140,7 +141,7 @@ def train():
 			losses_val.append(loss_val)
 			losses_train.append(loss_train)
 			
-			print 'C = {:.2} gamma = {:.2} Train = {:.2}, {:.2} Val = {:.2}, {:.2}'.format(C, gamma, score_train, loss_train, score_val, loss_val) 
+			print('C = {:.2} gamma = {:.2} Train = {:.2}, {:.2} Val = {:.2}, {:.2}'.format(C, gamma, score_train, loss_train, score_val, loss_val)) 
 			
 	plt.figure()
 	plt.semilogx(regularization, scores_val)
@@ -167,13 +168,13 @@ def test_evaluate():
 	loss  = log_loss(y_test, model.predict_proba(X_test)[:,1])
 	
 	for title, label, prob in zip(titles, y_test, model.predict_proba(X_test)[:,1]):
-		print '{} {:.2} {} \t{}'.format(label, prob, np.round(prob), title)
+		print('{} {:.2} {} \t{}'.format(label, prob, np.round(prob), title))
 	
-	print 'Evaluation on test data: loss = {:.3}, acc = {:.3}'.format(loss, score)
+	print('Evaluation on test data: loss = {:.3}, acc = {:.3}'.format(loss, score))
 	
 	score = model.score(X_train, y_train)
 	loss  = log_loss(y_train, model.predict_proba(X_train)[:,1])
-	print 'Evaluation on test data: loss = {:.3}, acc = {:.3}'.format(loss, score)
+	print('Evaluation on test data: loss = {:.3}, acc = {:.3}'.format(loss, score))
 	
 	# Persist the model
 	joblib.dump(scaler, 'feature_scaler.pkl')
@@ -248,7 +249,7 @@ def evaluate_each_dbeat_of_song(path_to_file):
 	
 	# Evaluate each segment of the song
 	for score in model.predict_proba(features)[:,1]:
-		print '{:.2}'.format(score)
+		print('{:.2}'.format(score))
 	plt.figure()
 	plt.plot(model.predict_proba(features)[:,1])
 	plt.show()

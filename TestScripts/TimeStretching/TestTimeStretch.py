@@ -1,3 +1,4 @@
+from __future__ import print_function
 import sys
 import numpy as np
 import BeatTracker
@@ -39,7 +40,7 @@ def crossfade(audio1, audio2, start1, start2, length, method=linear):
 if __name__ == '__main__':
 	
 	if len(sys.argv) != 3:
-		print 'Usage: ', sys.argv[0], ' <file1> <file2>'
+		print('Usage: ', sys.argv[0], ' <file1> <file2>')
 		exit()
 		
 	file1 = sys.argv[1]
@@ -47,36 +48,36 @@ if __name__ == '__main__':
 	
 	# Load first audio file
 	b = BeatTracker.BeatTracker(minBpm = 160.0, maxBpm = 195.0)
-	print 'Loading audio file "', file1, '" ...'
+	print('Loading audio file "', file1, '" ...')
 	loader = essentia.standard.MonoLoader(filename = file1)
 	audio1 = np.array(loader())
-	print 'Processing...'
+	print('Processing...')
 	b.run(audio1)
 	bpm1 = b.getBpm()
 	phase1 = b.getPhase()
-	print 'Bpm ', bpm1, ' and phase ', phase1
+	print('Bpm ', bpm1, ' and phase ', phase1)
 	
 	# Load second audio file
-	print 'Loading audio file "', file2, '" ...'
+	print('Loading audio file "', file2, '" ...')
 	loader = essentia.standard.MonoLoader(filename = file2)
 	audio2 = np.array(loader())
-	print 'Processing...'
+	print('Processing...')
 	b.run(audio2)
 	bpm2 = b.getBpm()
 	phase2 = b.getPhase()
-	print 'Bpm ', bpm2, ' and phase ', phase2
+	print('Bpm ', bpm2, ' and phase ', phase2)
 	
 	# Timestretching
 	#TODO pyrubberband uses temp files, which is actually not that nice :(
 	if(bpm2 != bpm1):
-		print 'Time stretching with rate ', bpm1/bpm2
+		print('Time stretching with rate ', bpm1/bpm2)
 		audio2_stretched = prb.time_stretch(audio2, 44100, bpm1/bpm2)
 	
 	# Cross-fading
 	start1 = int(44100.0 * (phase1 + 537*(60./bpm1)))
 	start2 = int(44100.0 * (phase2 * bpm2/bpm1 + 1*(60./bpm1))) #bpm1 because audio2 has been stretched!
 	length = int(44100.0 * (8*(60./bpm1)))
-	print 'Crossfade from ', start1, ' till ', start1+length, '; start2 = ', start2
+	print('Crossfade from ', start1, ' till ', start1+length, '; start2 = ', start2)
 	result = crossfade(audio1, audio2_stretched, start1, start2, length).astype('single')
 	
 	# Write the result to a file

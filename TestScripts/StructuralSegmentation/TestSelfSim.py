@@ -1,3 +1,4 @@
+from __future__ import print_function
 from essentia import *
 from essentia.standard import MonoLoader, Spectrum, Windowing, MFCC, FrameGenerator, Spectrum
 from sklearn.metrics.pairwise import cosine_similarity
@@ -12,7 +13,7 @@ import matplotlib.pyplot as plt
 from BeatTracker import *
 
 if len(sys.argv) != 2:
-	print 'Usage : ', sys.argv[0], ' <filename>'
+	print('Usage : ', sys.argv[0], ' <filename>')
 	exit()
 
 filename = sys.argv[1]	
@@ -22,15 +23,15 @@ audio = loader()
 
 # Beat tracking
 
-print 'Extracting beat information...'
+print('Extracting beat information...')
 beatTracker = BeatTracker()
 beatTracker.run(audio)
 beats = beatTracker.getBeats()
 bpm = beatTracker.getBpm()
 phase = beatTracker.getPhase()
 beats = beats - phase
-print 'Bpm: ', bpm
-print 'Frame size in samples: ', 44100 * (60.0/bpm)
+print('Bpm: ', bpm)
+print('Frame size in samples: ', 44100 * (60.0/bpm))
 
 
 # Followed approach from Foote
@@ -40,7 +41,7 @@ FRAME_SIZE = int(44100 * (60.0/bpm)) / 4
 FRAME_SIZE = FRAME_SIZE - FRAME_SIZE % 2
 HOP_SIZE = FRAME_SIZE
 frames_per_second = (44100.0 / FRAME_SIZE) * (FRAME_SIZE / HOP_SIZE)
-print frames_per_second
+print(frames_per_second)
 beats = beats * frames_per_second
 spec = Spectrum(size = FRAME_SIZE)
 w = Windowing(type = 'hann')
@@ -59,14 +60,14 @@ for frame in FrameGenerator(audio[start_sample:], frameSize = FRAME_SIZE, hopSiz
     pool.add('lowlevel.mfcc_bands', mfcc_bands)
 
 # Step 2: correlate
-print np.shape(np.array(pool['lowlevel.mfcc']))
+print(np.shape(np.array(pool['lowlevel.mfcc'])))
 matrix = cosine_similarity(np.array(pool['lowlevel.mfcc']))
 #~ matrix = 1 - scipy.spatial.distance.pdist(np.array(pool['lowlevel.mfcc']), metric='cosine')
-print np.shape(matrix)
+print(np.shape(matrix))
 
 a = [pool['lowlevel.mfcc'][127], pool['lowlevel.mfcc'][128]]
-print matrix[127][127:129], matrix[128][127:129]
-print cosine_similarity(np.array(a))
+print(matrix[127][127:129], matrix[128][127:129])
+print(cosine_similarity(np.array(a)))
 
 
 plt.figure()

@@ -1,3 +1,4 @@
+from __future__ import print_function
 from songcollection import SongCollection
 import pyaudio, csv
 import numpy as np
@@ -14,7 +15,7 @@ if __name__ == '__main__':
 		for row in csv.reader(csvfile):
 			analysedSongs.append(row[0])
 		
-	print analysedSongs
+	print(analysedSongs)
 	
 	with open('evaluateMoresongs.csv', 'a') as csvfile:
 		writer = csv.writer(csvfile)
@@ -30,7 +31,7 @@ if __name__ == '__main__':
 			if song.title in analysedSongs:
 				continue
 
-			print song.title
+			print(song.title)
 			song.open()
 			song.openAudio()
 			indices = song.segment_indices
@@ -53,7 +54,7 @@ if __name__ == '__main__':
 					START_BEFORE = 2
 					start_db = song.downbeats[max(0, indices[idx]-START_BEFORE)]
 					end_db = song.downbeats[min(len(song.downbeats)-1, indices[idx] + 2)]	
-					print start_db, end_db, song.tempo			
+					print(start_db, end_db, song.tempo)			
 					dbeats = np.arange(0,end_db - start_db,4*60.0/song.tempo).astype('float32')
 					onsetsMarker = AudioOnsetsMarker(onsets = 1.0 * dbeats[START_BEFORE::8])	
 					toPlay = onsetsMarker(song.audio[int(start_db * 44100):int(end_db * 44100)])

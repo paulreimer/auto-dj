@@ -1,3 +1,4 @@
+from __future__ import print_function
 import numpy as np
 import sys
 from essentia import *
@@ -111,7 +112,7 @@ class BeatTracker:
 			frames = (np.round(np.arange(phase_frames,np.size(novelty_hwr), self.numFramesPerBeat(bpm))).astype('int'))[:-1] # Discard last value to prevent reading beyond array (last value rounded up for example)
 			pool.add('output.phase', np.sum(novelty_hwr[frames])/np.size(frames))
 		phase = valid_phases[np.argmax(pool['output.phase'])]
-		print 'PHASE', phase
+		print('PHASE', phase)
 		# Step 6: Determine the beat locations
 		spb = 60./bpm #seconds per beat
 		beats = (np.arange(phase, (np.size(audio)/44100) - spb + phase, spb).astype('single'))
@@ -157,7 +158,7 @@ class BeatTracker:
 			plt.plot(novelty_hwr)
 			for f in frames:
 				plt.axvline(x = f)
-		print pool['output.downbeat']
+		print(pool['output.downbeat'])
 		downbeatIndex = np.argmax(pool['output.downbeat'])
 		plt.show()
 		
@@ -171,11 +172,11 @@ if __name__ == '__main__':
 	from essentia.standard import MonoLoader, AudioOnsetsMarker, MonoWriter
 	
 	if len(sys.argv) != 2:
-		print 'Usage: ', sys.argv[0], ' <filename>'
+		print('Usage: ', sys.argv[0], ' <filename>')
 	filename = sys.argv[1]
 	
 	# Load the audio
-	print 'Loading audio file "', filename, '" ...'
+	print('Loading audio file "', filename, '" ...')
 	loader = essentia.standard.MonoLoader(filename = filename)
 	audio = loader()
 	for i in range(5):
@@ -183,8 +184,8 @@ if __name__ == '__main__':
 
 		tracker = BeatTracker()
 		tracker.run(audio)
-		print 'Detected BPM: ', tracker.getBpm()
-		print 'Detected phase: ', tracker.getPhase()
+		print('Detected BPM: ', tracker.getBpm())
+		print('Detected phase: ', tracker.getPhase())
 		beats = (tracker.getBeats())
 		downbeats = (tracker.getDownbeats())
 		

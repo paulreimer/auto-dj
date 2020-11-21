@@ -1,3 +1,4 @@
+from __future__ import print_function
 from song import Song
 from songcollection import SongCollection
 import sys, os, csv
@@ -149,7 +150,7 @@ if __name__ == '__main__':
 	average_clash_length = 0.0
 	num_clashes = 0
 	for title_1, y_tuple_1 in masks.iteritems():
-		print title_1
+		print(title_1)
 		song_1 = [s for s in sc.get_annotated() if s.title == title_1][0]
 		
 		for title_2, y_tuple_2 in masks.iteritems():
@@ -201,9 +202,9 @@ if __name__ == '__main__':
 						
 						# TODO save result and report
 	
-		print average_clash_length / num_clashes
-		print confusion_matrix
-		print np.array(confusion_matrix) / np.sum(confusion_matrix,axis=1,dtype='float').reshape((-1,1))
+		print(average_clash_length / num_clashes)
+		print(confusion_matrix)
+		print(np.array(confusion_matrix) / np.sum(confusion_matrix,axis=1,dtype='float').reshape((-1,1)))
 	
 	for title_1, y_tuple_1 in masks.iteritems():
 		song_1 = [s for s in sc.get_annotated() if s.title == title_1][0]

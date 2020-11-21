@@ -1,3 +1,4 @@
+from __future__ import print_function
 from essentia import *
 from essentia.standard import MonoLoader, Spectrum, Windowing, MFCC, FrameGenerator, Spectrum
 from sklearn.metrics.pairwise import pairwise_distances
@@ -16,7 +17,7 @@ Do this four times, i.e. once for every candidate downbeat candidate
 '''
 
 if len(sys.argv) != 2:
-	print 'Usage : ', sys.argv[0], ' <filename>'
+	print('Usage : ', sys.argv[0], ' <filename>')
 	exit()
 
 filename = sys.argv[1]	
@@ -26,15 +27,15 @@ audio = loader()
 
 # Beat tracking
 
-print 'Extracting beat information...'
+print('Extracting beat information...')
 beatTracker = BeatTracker()
 beatTracker.run(audio)
 beats = beatTracker.getBeats()
 bpm = beatTracker.getBpm()
 phase = beatTracker.getPhase()
 beats = beats - phase
-print 'Bpm: ', bpm
-print 'Frame size in samples: ', 44100 * (60.0/bpm)
+print('Bpm: ', bpm)
+print('Frame size in samples: ', 44100 * (60.0/bpm))
 
 
 # Followed approach from Foote
@@ -66,7 +67,7 @@ for start_sample_offset_beats in range(4):
 		pool.add('lowlevel.mfcc_bands' + str(start_sample_offset_beats), mfcc_bands)
 
 	# Step 2: correlate
-	print np.shape(pool['lowlevel.mfcc'+ str(start_sample_offset_beats)] )
+	print(np.shape(pool['lowlevel.mfcc'+ str(start_sample_offset_beats)] ))
 	matrices[start_sample_offset_beats] = 1-pairwise_distances(pool['lowlevel.mfcc' + str(start_sample_offset_beats)],\
 		pool['lowlevel.mfcc' + str(start_sample_offset_beats)],metric='cosine')
 

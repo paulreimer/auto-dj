@@ -1,3 +1,4 @@
+from __future__ import print_function
 import sys
 
 import numpy as np
@@ -18,7 +19,7 @@ HOP_SIZE = FRAME_SIZE/2
 #~ spectogram = np.array([np.log(spectrum(w(frame))) for frame in frames])
 spectogram = cqt(audio, sr=44100, bins_per_octave=12, n_bins= 84)
 spec_db = librosa.amplitude_to_db(spectogram, ref=np.max)
-print (np.shape(spec_db), spec_db.dtype)
+print((np.shape(spec_db), spec_db.dtype))
 
 librosa.display.specshow(spec_db, sr=44100)
 #~ plt.imshow(spec_db, aspect='auto')

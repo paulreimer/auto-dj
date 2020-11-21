@@ -1,3 +1,4 @@
+from __future__ import print_function
 from BeatTracker import *
 import numpy as np
 import sys, os
@@ -30,7 +31,7 @@ def writeAnnotFile(beats, bpm, phase, value, filename, outDir):
 if __name__ == '__main__':
 	
 	if len(sys.argv) != 3:
-		print 'Usage: ', sys.argv[0], ' <directory> <out_directory>'
+		print('Usage: ', sys.argv[0], ' <directory> <out_directory>')
 		exit()
 	
 	directory = sys.argv[1]
@@ -44,15 +45,15 @@ if __name__ == '__main__':
 				continue 
 			
 			# Step 0: Load the audio
-			print 'Processing "', filename, '" ...'
+			print('Processing "', filename, '" ...')
 			loader = essentia.standard.MonoLoader(filename = directory + filename + ext)
 			audio = loader()
 
 			# Step 1: Get the BPM
 			tracker = BeatTracker(minBpm = 150.0)
 			tracker.run(audio)
-			print 'Detected BPM: ', tracker.getBpm()
-			print 'Detected phase: ', tracker.getPhase()
+			print('Detected BPM: ', tracker.getBpm())
+			print('Detected phase: ', tracker.getPhase())
 			beats = (tracker.getBeats())
 			
 			# Step 2: overlay with beeps
@@ -64,7 +65,7 @@ if __name__ == '__main__':
 			userInput = ''
 			validOptions = ['a','z','e','r','x']
 			
-			print 'Was the input correct? (a: 0, z:1, e:2, r:3, x:bpm wrong, t:play again)'
+			print('Was the input correct? (a: 0, z:1, e:2, r:3, x:bpm wrong, t:play again)')
 			while len(userInput) != 1 or (userInput not in validOptions):
 				userInput = raw_input(':').lower()
 				if userInput == 't':
@@ -81,7 +82,7 @@ if __name__ == '__main__':
 				}
 				writeAnnotFile(beats, tracker.getBpm(), tracker.getPhase(), onsetMappings[userInput], filename, out_directory)
 			else:
-				print 'ERROR: INCORRECT BPM DETECTION'
+				print('ERROR: INCORRECT BPM DETECTION')
 				with open(out_directory + 'ERROR_beats_' + filename + '.txt', 'w+') as f:
 					for beat in beats[::]:
 						f.write(str(beat) + '\n')

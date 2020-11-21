@@ -1,3 +1,4 @@
+from __future__ import print_function
 import numpy as np
 import sys
 from essentia import *
@@ -132,19 +133,19 @@ if __name__ == '__main__':
 	from essentia.standard import MonoLoader, AudioOnsetsMarker, MonoWriter
 	
 	if len(sys.argv) != 2:
-		print 'Usage: ', sys.argv[0], ' <filename>'
+		print('Usage: ', sys.argv[0], ' <filename>')
 	filename = sys.argv[1]
 	
 	# Load the audio
-	print 'Loading audio file "', filename, '" ...'
+	print('Loading audio file "', filename, '" ...')
 	loader = essentia.standard.MonoLoader(filename = filename)
 	audio = loader()
 
 	# TESTING HERE
 	tracker = BeatTracker()
 	tracker.run(audio)
-	print 'Detected BPM: ', tracker.getBpm()
-	print 'Detected phase: ', tracker.getPhase()
+	print('Detected BPM: ', tracker.getBpm())
+	print('Detected phase: ', tracker.getPhase())
 	beats = tracker.getBeats()	
 	# END TESTING
 	

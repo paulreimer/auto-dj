@@ -1,21 +1,22 @@
+from __future__ import print_function
 import sys
 
 # Load a file using the command line
 try:
     filename = sys.argv[1]
 except:
-    print "usage:", sys.argv[0], "<audiofile>"
+    print("usage:", sys.argv[0], "<audiofile>")
     sys.exit()
 
 # Load the libraries
-print 'Loading Essentia...'
+print('Loading Essentia...')
 import numpy as np
 from essentia import *
 from essentia.standard import *
 import matplotlib.pyplot as plt # For plotting
 
 # Load the audio
-print 'Loading audio file "', filename, '" ...'
+print('Loading audio file "', filename, '" ...')
 loader = MonoLoader(filename = filename)
 audio = loader()
 
@@ -37,7 +38,7 @@ for frame in FrameGenerator(audio, frameSize = FRAME_SIZE, hopSize = HOP_SIZE):
 	pool.add('lowlevel.freq_bands', freq_bands)
 
 frequencyBands = array(pool['lowlevel.freq_bands'])
-print 'frequencybands dim: ', frequencyBands.shape
+print('frequencybands dim: ', frequencyBands.shape)
 plt.imshow(frequencyBands, aspect='auto')
 plt.show()
 
@@ -49,11 +50,11 @@ plt.plot(novelty)
 plt.show()
 
 # Calculate beat positions
-print 'Calculating beat positions...'
+print('Calculating beat positions...')
 beat_tracker = NoveltyCurveFixedBpmEstimator(hopSize=HOP_SIZE, tolerance=0.00001) #Tolerance: 172/172,5 = .9971
 #beat_tracker = NoveltyCurveFixedBpmEstimator(hopSize=HOP_SIZE, tolerance=0.00001) #Tolerance: 172/172,5 = .9971
 bpms, amplitudes = beat_tracker(novelty)
-print '> BPM = ', bpms, ', with confidence: ', amplitudes
+print('> BPM = ', bpms, ', with confidence: ', amplitudes)
 plt.plot(bpm_dist)
 plt.show()
 plt.plot(bpmIntervals)
@@ -65,16 +66,16 @@ BPM = 60. / np.mean(delta_beats)
 lenAudioInMin = (len(audio)/(44100.0 * 60))
 BPM2 = len(beats) / lenAudioInMin
 BPM_std = np.std(delta_beats)
-print '> BPM = ', BPM, '; using length of file: ', BPM2, '; std = ', BPM_std
+print('> BPM = ', BPM, '; using length of file: ', BPM2, '; std = ', BPM_std)
 
 delta_beats_run_mean = running_mean(delta_beats, 64)
-print '> Mean of running mean (low pass filter) of instant BPM: ', np.average(60./delta_beats_run_mean)
+print('> Mean of running mean (low pass filter) of instant BPM: ', np.average(60./delta_beats_run_mean))
 
 # Plot how the beat distances are distributed
 hist, bins = np.histogram(delta_beats, bins = 20)
 valid_bins = np.where(hist >= len(delta_beats)/10)
-print valid_bins
-print bins
+print(valid_bins)
+print(bins)
 delta_beats_bin_index = np.digitize(delta_beats, bins) - 1
 delta_beats_filtered = delta_beats[np.in1d(delta_beats_bin_index, valid_bins)]
 delta_beats_filtered_plot = np.where(np.in1d(delta_beats_bin_index, valid_bins), delta_beats, 60./170)
@@ -84,7 +85,7 @@ plt.bar(center, hist, align='center', width=width)
 plt.hist(delta_beats_filtered, bins=bins, color='red', width = 0.9*(bins[1]-bins[0]))
 plt.show()
 
-print '> BPM based on filtered histogram: ', np.mean(60./delta_beats_filtered)
+print('> BPM based on filtered histogram: ', np.mean(60./delta_beats_filtered))
 
 binwidth = .5
 hist_data = 60./delta_beats

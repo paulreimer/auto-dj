@@ -1,3 +1,4 @@
+from __future__ import print_function
 #from BeatTracker import *
 import numpy as np
 import sys, os
@@ -19,7 +20,7 @@ def writeAnnotFile(beats, bpm, phase, filename, outDir):
 if __name__ == '__main__':
 	
 	if len(sys.argv) != 3:
-		print 'Usage: ', sys.argv[0], ' <directory> <out_directory>'
+		print('Usage: ', sys.argv[0], ' <directory> <out_directory>')
 		exit()
 	
 	directory = sys.argv[1]
@@ -31,7 +32,7 @@ if __name__ == '__main__':
 			filename, ext = os.path.splitext(filename)
 			if os.path.isfile(out_directory + 'downbeats_' + filename + '.txt'):
 				# Step 0: Load the audio
-				print 'Processing "', filename, '" ...'
+				print('Processing "', filename, '" ...')
 				loader = essentia.standard.MonoLoader(filename = directory + filename + ext)
 				audio = loader()
 
@@ -45,7 +46,7 @@ if __name__ == '__main__':
 				# Step 2: overlay with beeps
 				writeAnnotFile(beats, bpm, phase, filename, out_directory)
 			else:
-				print 'Could not parse downbeat annotations for ', filename
+				print('Could not parse downbeat annotations for ', filename)
 			
 			
 				

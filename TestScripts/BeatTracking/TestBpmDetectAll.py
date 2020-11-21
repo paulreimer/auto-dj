@@ -1,9 +1,10 @@
+from __future__ import print_function
 import numpy as np
 import sys
 import os
 
 # Load the libraries
-print 'Loading Essentia...'
+print('Loading Essentia...')
 from essentia import *
 from essentia.standard import *
 import matplotlib.pyplot as plt
@@ -18,13 +19,13 @@ for f in os.listdir("."):
 		filename = f
 		
 		# Load the audio
-		print 'Loading audio file "', filename, '" ...'
+		print('Loading audio file "', filename, '" ...')
 		loader = essentia.standard.MonoLoader(filename = filename)
 		audio = loader()
 
 		#TODO test OnsetDetectionGlobal
 		# ------------ Calculate the onset detection function
-		print 'Initialising algorithms...'
+		print('Initialising algorithms...')
 		FRAME_SIZE = 1024
 		HOP_SIZE = 512
 		spec = Spectrum(size = FRAME_SIZE)
@@ -38,7 +39,7 @@ for f in os.listdir("."):
 
 		pool = Pool()
 
-		print 'Calculating frame-wise onset detection curve...'
+		print('Calculating frame-wise onset detection curve...')
 		for frame in FrameGenerator(audio, frameSize = FRAME_SIZE, hopSize = HOP_SIZE):
 			mag, phase, = c2p(fft(w(frame)))
 			pool.add('onsets.complex', od_csd(mag, phase))
@@ -51,7 +52,7 @@ for f in os.listdir("."):
 
 		# ------------ Calculate the tempo function thingy (using method from paper)
 		# Step 1: normalise the data using an adaptive mean threshold
-		print 'Normalising result and half-wave rectifying it...'
+		print('Normalising result and half-wave rectifying it...')
 		def adaptive_mean(x, N):
 			#TODO efficient implementation instead of convolve
 			return np.convolve(x, [1.0]*int(N), mode='same')/N
@@ -63,7 +64,7 @@ for f in os.listdir("."):
 		plt.plot(novelty_hwr)   
 
 		# Step 3: then calculate the autocorrelation of this signal
-		print 'Autocorrelating resulting curve...'
+		print('Autocorrelating resulting curve...')
 		def autocorr(x):
 			result = np.correlate(x, x, mode='full')
 			return result[result.size/2:]
@@ -74,7 +75,7 @@ for f in os.listdir("."):
 
 		#( Step 4: Apply a shift-invariant comb filterbank) --> not yet
 		# own implementation: sum over constant intervals
-		print 'Iterating over valid BPM values...'
+		print('Iterating over valid BPM values...')
 		valid_bpms = np.arange(170.0, 176.0, 0.01)
 		for bpm in valid_bpms:
 			num_frames_per_beat = (60.0 * 44100.0)/(512.0 * bpm)
@@ -83,6 +84,6 @@ for f in os.listdir("."):
 
 		plt.subplot(414)
 		plt.plot(valid_bpms, pool['output.bpm'])   
-		print 'Done!'
+		print('Done!')
 
 plt.show()

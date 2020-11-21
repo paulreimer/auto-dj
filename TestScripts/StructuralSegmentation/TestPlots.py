@@ -1,6 +1,7 @@
 '''
 	Initial test script for structural segmentation
 '''
+from __future__ import print_function
 
 
 from essentia import *
@@ -69,7 +70,7 @@ class Song:
 		self.dir_annot = self.dir_ + '/' + ANNOT_SUBDIR
 		
 		if not os.path.isdir(self.dir_annot):
-			print 'Creating annotation directory : ' + self.dir_annot
+			print('Creating annotation directory : ' + self.dir_annot)
 			os.mkdir(self.dir_annot)
 		
 		self.audio = None
@@ -124,7 +125,7 @@ class Song:
 		self.tempo = res_dict['bpm']
 		self.phase = res_dict['phase']
 		self.downbeats, res_dict = loadAnnotationFile(self.dir_, self.title, ANNOT_DOWNB_PREFIX)	
-		print 'Opened ' + str(self.title) + '; tempo: ' + str(self.tempo)
+		print('Opened ' + str(self.title) + '; tempo: ' + str(self.tempo))
 		
 	# Close the audio file and reset all buffers to None
 	def close(self):
@@ -160,7 +161,7 @@ Do this four times, i.e. once for every candidate downbeat candidate
 '''
 
 if len(sys.argv) != 2 and len(sys.argv) != 3:
-	print 'Usage : ', sys.argv[0], ' <filename> [<start_segment>]'
+	print('Usage : ', sys.argv[0], ' <filename> [<start_segment>]')
 	exit()
 
 filename = sys.argv[1]	
@@ -168,9 +169,9 @@ filename = sys.argv[1]
 song = Song(filename)
 
 # Beat tracking
-print 'Loading beat and downbeat information...'
+print('Loading beat and downbeat information...')
 song.open()
-print song.title, song.tempo, song.phase
+print(song.title, song.tempo, song.phase)
 audio = song.audio
 
 # Initializing algorithms
@@ -238,7 +239,7 @@ num_filtered_out = 0
 
 downbeat_len_s = 4 * 60.0 / song.tempo
 delta = 0.4
-print len(peaks_pos), peaks_pos[-1] * HOP_SIZE / float(len(audio))
+print(len(peaks_pos), peaks_pos[-1] * HOP_SIZE / float(len(audio)))
 for dbindex, downbeat in zip(range(len(song.downbeats)), np.array(song.downbeats) - song.downbeats[0]):
 	# Skip the peaks prior to the acceptance interval
 	while peak_cur_s < downbeat - delta * downbeat_len_s and peak_idx < len(peaks_pos):
@@ -264,7 +265,7 @@ for dbindex, downbeat in zip(range(len(song.downbeats)), np.array(song.downbeats
 peaks_pos_modified, peaks_ampl_modified = np.array(peaks_pos_modified), np.array(peaks_ampl_modified)
 peaks_pos_dbindex = np.array(peaks_pos_dbindex)
 
-print 'Number of peaks filtered out: ', num_filtered_out
+print('Number of peaks filtered out: ', num_filtered_out)
 
 # Determine the most dominant peaks and see if they lie at a multiple of 8 downbeats from each 
 # Assumption 1: high peaks are important; assumption 2: they should lie at multiples of 8 downbeats (phrase) from each other
@@ -298,14 +299,14 @@ for i in range(8): #highest_peaks_db_indices:
 
 # For the positions where the highest downbeats are detected, determine which one has the most alignments
 # Discard the peaks where no highest peak has been detected
-print distances8 * np.array([p / sum(distances8_high) if p > 0 else 0 for p in distances8_high])
+print(distances8 * np.array([p / sum(distances8_high) if p > 0 else 0 for p in distances8_high]))
 most_likely_8db_index = np.argmax(distances8 * np.array([float(p) / sum(distances8_high) if p > 0 else 0 for p in distances8_high]))
-print distances, distances_high
-print distances8, distances8_high
-print most_likely_8db_index
+print(distances, distances_high)
+print(distances8, distances8_high)
+print(most_likely_8db_index)
 
 last_downbeat = song.downbeats[-1]
-print 'Total length in downbeats: ' + str(last_downbeat)
+print('Total length in downbeats: ' + str(last_downbeat))
 segment_indices = [most_likely_8db_index if most_likely_8db_index <= 4 else most_likely_8db_index - 8] 	# Always have the start of the song as a likely db index
 segment_indices.extend([db for db in highest_peaks_db_indices if (db - most_likely_8db_index) % 8 == 0]) 	# Also have all important segments in there 
 segment_indices.extend([db+1 for db in highest_peaks_db_indices if (db + 1 - most_likely_8db_index) % 8 == 0])
@@ -363,7 +364,7 @@ if recurrencePlot:
 	
 	# --- HPCP features	
 	FRAME_SIZE_2 = int(44100 * (60.0 / song.tempo) / 2)
-	print 44100 * (60.0 / song.tempo) / 2
+	print(44100 * (60.0 / song.tempo) / 2)
 	HOP_SIZE_2 = FRAME_SIZE_2 / 2
 	for frame in FrameGenerator(audio, frameSize = FRAME_SIZE_2, hopSize = HOP_SIZE_2):
 		freqs, mags = speaks(spectrum(w(frame[:FRAME_SIZE_2-(FRAME_SIZE_2 % 2)])))
@@ -448,7 +449,7 @@ if recurrencePlot:
 # Plot the downbeats
 
 dbeats = (np.array(song.downbeats) - song.downbeats[0])
-print dbeats[0]
+print(dbeats[0])
 dbeats = dbeats * 44100
 #~ for i, beat in zip(range(len(dbeats)), dbeats):
 	#~ plt.axvline(x_beats[int(beat)/100], linewidth = 1, c='black')
@@ -470,7 +471,7 @@ plt.plot(x_a, novelty_mfcc, color='red', linewidth=2)
 	
 
 if recurrencePlot:
-	print e_length_fraction
+	print(e_length_fraction)
 	plt.plot(np.linspace(0,e_length_fraction,len(d)), -d, color='black', linewidth=2)
 	plt.plot(x_e, e, color='red', linewidth=2)
 	

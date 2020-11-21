@@ -13,6 +13,7 @@
 	Generate test data:
 	python generate_downbeats_for_class.py ../music/test/
 '''
+from __future__ import print_function
 
 import sys, os, glob, csv
 
@@ -69,7 +70,7 @@ def calculateFeaturesForDownbeat(audio):
 	if max_spec != min_spec:
 		spec_db = (spec_db - min_spec) / (max_spec - min_spec)
 	else:
-		print 'Max equals min!'
+		print('Max equals min!')
 		spec_db = (spec_db - np.min(spec_db))
 	# Statistics for each frequency bin (each row => aggregate over axis 1 = columns)
 	NUM_FRAMES = spectogram.shape[1]
@@ -138,7 +139,7 @@ if __name__ == '__main__':
 	}
 	songs = {}
 
-	print 'Opening all songs...'
+	print('Opening all songs...')
 	i = 0
 
 	for f in [f for f in os.listdir(directory) if os.path.splitext(f)[1] == '.mp3' or os.path.splitext(f)[1] == '.wav']:
@@ -155,7 +156,7 @@ if __name__ == '__main__':
 		else:
 			song = songs[f]
 			
-	print 'Opened all songs...'
+	print('Opened all songs...')
 		
 	with open('output/features.csv', 'w+') as csvfile:
 		csvwriter = csv.writer(csvfile)
@@ -173,7 +174,7 @@ if __name__ == '__main__':
 			segs_H = [segidxs[j] for j in range(len(segidxs)-2) if segtypes[j] == 'H']	# Exclude the last two segments (end of the song)
 			segs_L = [segidxs[j] for j in range(len(segidxs)-2) if segtypes[j] == 'L']
 			
-			print song.title, num_examples_to_generate
+			print(song.title, num_examples_to_generate)
 		
 			for i in range(num_examples_to_generate):
 				
@@ -226,9 +227,9 @@ if __name__ == '__main__':
 				datarow_good = calculateFeaturesForDownbeat(audio)
 				datarow_bad = calculateFeaturesForDownbeat(audio_mixed)
 				if isPlot:
-					print len(datarow_good)
-					print 'Good ', datarow_good
-					print 'Bad ', datarow_bad
+					print(len(datarow_good))
+					print('Good ', datarow_good)
+					print('Bad ', datarow_bad)
 					plt.show()
 				
 				# Write features to feature file
@@ -242,7 +243,7 @@ if __name__ == '__main__':
 				# Logging of stats
 				num_segments_generated = num_segments_generated + 1
 			
-			print num_segments_generated
+			print(num_segments_generated)
 			
 			if writeAudio:
 				writer = MonoWriter(filename='output/good_'+song.title+'.wav')

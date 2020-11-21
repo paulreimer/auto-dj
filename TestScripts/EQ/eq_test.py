@@ -1,4 +1,5 @@
 ''' Simple test script to mess with shelf filtering '''
+from __future__ import print_function
 
 import os, sys, random
 from essentia import *
@@ -35,15 +36,15 @@ if __name__ == '__main__':
 	
 	output_audio = np.zeros(44100*(start3-start2))
 	output_audio_2 = np.zeros(44100*(start4-start3))
-	print 
+	print() 
 	
-	print 'Filtering...'
+	print('Filtering...')
 	
 	NUM_STEPS = 20
 	
 	
 	profile = np.append((np.arange(0, NUM_STEPS/2) / float(NUM_STEPS/2)), (NUM_STEPS/2 * [1]))
-	print profile
+	print(profile)
 	
 	
 	first_idx = int(44100 * start2)
@@ -72,9 +73,9 @@ if __name__ == '__main__':
 	
 	output_audio = output_audio.astype('float32')
 	output_audio_2 = output_audio_2.astype('float32')
-	print 'Filtered'
+	print('Filtered')
 	
-	print output_audio.dtype
+	print(output_audio.dtype)
 	
 	p = pyaudio.PyAudio()
 	stream = p.open(format = pyaudio.paFloat32,
@@ -82,11 +83,11 @@ if __name__ == '__main__':
 					rate=44100,
 					output=True)
 	
-	print 'Normal playing'
+	print('Normal playing')
 	stream.write(audio[44100*start1:44100*start2], num_frames=44100*(start2-start1), exception_on_underflow=True)
-	print 'Low cutoff playing'
+	print('Low cutoff playing')
 	stream.write(output_audio, num_frames=len(output_audio), exception_on_underflow=True)
-	print 'High cutoff playing'
+	print('High cutoff playing')
 	stream.write(output_audio_2, num_frames=len(output_audio_2), exception_on_underflow=True)
 	
 	stream.stop_stream()

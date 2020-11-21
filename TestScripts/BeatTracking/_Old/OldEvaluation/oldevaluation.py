@@ -7,8 +7,9 @@ with the two txt or csv files the two beat files to compare.
 
 You might need to zoom in on the X-axis to see the results instead of loads of red and black stripes
 '''
+from __future__ import print_function
 
-print 'Loading Essentia...'
+print('Loading Essentia...')
 import essentia
 from essentia.standard import *
 import matplotlib.pyplot as plt # For plotting
@@ -29,7 +30,7 @@ def getBeatsFromFile(input_file):
 	return result
 
 # Load the audio
-print 'Loading audio file "', audiofile, '" ...'
+print('Loading audio file "', audiofile, '" ...')
 loader = essentia.standard.MonoLoader(filename = audiofile)
 audio = loader()
 

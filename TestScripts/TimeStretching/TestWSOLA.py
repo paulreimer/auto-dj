@@ -1,3 +1,4 @@
+from __future__ import print_function
 import sys
 import numpy as np
 import BeatTracker
@@ -117,7 +118,7 @@ def time_stretch_sola(audio, f, bpm, phase, sample_rate = 44100, fragment_s = 0.
 		
 		# Mix the overlap parts of the frames
 		output[out_ptr + frame_len_0 : out_ptr + frame_len_1] = crossfade(frame1_overlap, frame2_overlap, length = overlap_len, method=linear)
-		print out_ptr + frame_len_0
+		print(out_ptr + frame_len_0)
 		
 		# Increase the input pointers
 		in_ptr = match_ptr + overlap_len
@@ -141,7 +142,7 @@ def crossfade(audio1, audio2, start1 = 0, start2 = 0, length = None, method=quad
 if __name__ == '__main__':
 	
 	if len(sys.argv) != 3:
-		print 'Usage: ', sys.argv[0], ' <file1> <bpm>'
+		print('Usage: ', sys.argv[0], ' <file1> <bpm>')
 		exit()
 		
 	file1 = sys.argv[1]
@@ -151,21 +152,21 @@ if __name__ == '__main__':
 	
 	# Load audio file
 	b = BeatTracker.BeatTracker(minBpm = 160.0, maxBpm = 195.0)
-	print 'Loading audio file "', file1, '" ...'
+	print('Loading audio file "', file1, '" ...')
 	loader = essentia.standard.MonoLoader(filename = file1)
 	audio1 = np.array(loader())
-	print 'Processing...'
+	print('Processing...')
 	b.run(audio1)
 	bpm1 = b.getBpm()
 	phase1 = b.getPhase()
-	print 'Bpm ', bpm1, ' and phase ', phase1
+	print('Bpm ', bpm1, ' and phase ', phase1)
 	
 	# Timestretching
 	beginIndex = int(44100.0 * (phase1 + 300*(60./bpm1)))
 	endIndex = int(44100.0 * (phase1 + 600*(60./bpm1)))
 	
 	if(bpm1 != bpm2):
-		print 'Time stretching with factor ', bpm1/bpm2
+		print('Time stretching with factor ', bpm1/bpm2)
 		audio_stretched = time_stretch_sola(audio1[beginIndex : endIndex], bpm1/bpm2, bpm1, phase1)
 	else:
 		audio_stretched = audio1

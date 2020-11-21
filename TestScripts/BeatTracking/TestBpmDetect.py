@@ -1,3 +1,4 @@
+from __future__ import print_function
 import numpy as np
 import sys
 
@@ -13,22 +14,22 @@ try:
 		MAX_VALID_BPM = 190.0
 		
 except:
-	print "usage:", sys.argv[0], "<audiofile>"
+	print("usage:", sys.argv[0], "<audiofile>")
 	sys.exit()
 
 # Load the libraries
-print 'Loading Essentia...'
+print('Loading Essentia...')
 from essentia import *
 from essentia.standard import *
 import matplotlib.pyplot as plt
 
 # Load the audio
-print 'Loading audio file "', filename, '" ...'
+print('Loading audio file "', filename, '" ...')
 loader = essentia.standard.MonoLoader(filename = filename)
 audio = loader()
 
 # ------------ Calculate the onset detection function
-print 'Initialising algorithms...'
+print('Initialising algorithms...')
 FRAME_SIZE = 1024
 HOP_SIZE = 512
 spec = Spectrum(size = FRAME_SIZE)
@@ -42,14 +43,14 @@ od_flux = OnsetDetection(method = 'complex')
 
 pool = Pool()
 
-print 'Calculating frame-wise onset detection curve...'
+print('Calculating frame-wise onset detection curve...')
 for frame in FrameGenerator(audio, frameSize = FRAME_SIZE, hopSize = HOP_SIZE):
 	pool.add('windowed_frames', w(frame))
 	
 # TODO Test if this is faster?
-print 'windowed frames: ', (pool['windowed_frames']).shape
+print('windowed frames: ', (pool['windowed_frames']).shape)
 fft_result = fft(pool['windowed_frames']).astype('complex64')
-print 'fftresult: ', fft_result.shape
+print('fftresult: ', fft_result.shape)
 fft_result_mag = np.absolute(fft_result)
 fft_result_ang = np.angle(fft_result)
 
@@ -63,7 +64,7 @@ for mag,phase in zip(fft_result_mag, fft_result_ang):
 
 # ------------ Calculate the tempo function thingy (using method from paper)
 # Step 1: normalise the data using an adaptive mean threshold
-print 'Normalising result and half-wave rectifying it...'
+print('Normalising result and half-wave rectifying it...')
 def adaptive_mean(x, N):
 	#TODO efficient implementation instead of convolve
 	return np.convolve(x, [1.0]*int(N), mode='same')/N
@@ -73,7 +74,7 @@ novelty_mean = adaptive_mean(pool['onsets.complex'], 16.0)
 novelty_hwr = (pool['onsets.complex'] - novelty_mean).clip(min=0)  
 
 # Step 3: then calculate the autocorrelation of this signal
-print 'Autocorrelating resulting curve...'
+print('Autocorrelating resulting curve...')
 def autocorr(x):
 	result = np.correlate(x, x, mode='full')
 	return result[result.size/2:]
@@ -82,7 +83,7 @@ novelty_autocorr = autocorr(novelty_hwr)
 
 # Step 4: Apply a "shift-invariant comb filterbank"
 # own implementation: sum over constant intervals
-print 'Iterating over valid BPM values...'
+print('Iterating over valid BPM values...')
 #valid_bpms = np.arange(170.0, 176.0, 0.01)
 valid_bpms = np.arange(MIN_VALID_BPM, MAX_VALID_BPM, 0.01)
 for bpm in valid_bpms:
@@ -91,7 +92,7 @@ for bpm in valid_bpms:
 	pool.add('output.bpm', np.sum(novelty_autocorr[frames])/np.size(frames))
 
 bpm = valid_bpms[np.argmax(pool['output.bpm'])]
-print 'Detected BPM: ', bpm
+print('Detected BPM: ', bpm)
 
 # Step 5: Calculate phase information
 # Valid phases in SECONDS
@@ -105,7 +106,7 @@ for phase in valid_phases:
 	pool.add('output.phase', np.sum(novelty_hwr[frames])/np.size(frames))  
 
 phase = valid_phases[np.argmax(pool['output.phase'])]
-print 'Detected phase: ', phase
+print('Detected phase: ', phase)
 
 spb = 60./bpm #seconds per beat
 beats = (np.arange(phase, (np.size(audio)/44100) - spb + phase, spb).astype('single'))

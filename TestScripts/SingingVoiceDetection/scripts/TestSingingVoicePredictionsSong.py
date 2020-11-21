@@ -4,6 +4,7 @@
 	Can only work after running the train script, which saves the singingvoice_?_train.bin.npy files.
 	Usage: python TestSingingVoicePredictionsSong.py path_to_song ../music ../moremusic <etc>
 '''
+from __future__ import print_function
 
 from song import Song
 from songcollection import SongCollection
@@ -62,7 +63,7 @@ if __name__ == '__main__':
 		title = sys.argv[1][len('singingvoice_predicted_'):-4]
 		y_train_all = np.load('singingvoice_y_train.bin.npy')
 		t_train_all = np.load('singingvoice_t_train.bin.npy')
-		print title
+		print(title)
 		cur_song_mask = np.array([t == title for t in t_train_all])
 		y_train = y_train_all[cur_song_mask]
 		y_train = y_train[np.array([i%4!=0 for i in range(len(y_train))])]
@@ -74,7 +75,7 @@ if __name__ == '__main__':
 		plt.fill_between(range(len(y_train[::3])),y_train[::3],alpha=0.5,color='red')
 		plt.show()
 		for y_true, y, t in zip(y_train[::4], y_pred[::4], song.downbeats):
-			print '{} {} {}'.format(y_true, y, t)
+			print('{} {} {}'.format(y_true, y, t))
 		song.close()
 		
 		
@@ -82,5 +83,5 @@ if __name__ == '__main__':
 		stream.stop_stream()
 		stream.close()
 		pyAudio.terminate()
-		print 'Closing streams'
+		print('Closing streams')
 

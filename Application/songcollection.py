@@ -1,3 +1,4 @@
+from __future__ import print_function
 import song
 from util import *
 import os
@@ -103,7 +104,7 @@ class SongCollection:
 		with open('markfile.csv') as csvfile:
 			reader = csv.reader(csvfile)
 			for line in reader:
-				print line
+				print(line)
 				markedTitles.extend(line)
 		return [s for s in self.songs if s.title in markedTitles]
 		

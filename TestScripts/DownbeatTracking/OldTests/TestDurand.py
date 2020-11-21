@@ -3,6 +3,7 @@
 	However, instead of mahalanobis distance, I use derivative along x-axis
 	
 '''
+from __future__ import print_function
 
 from essentia import *
 from essentia.standard import MonoLoader, Spectrum, Windowing, MFCC, FrameGenerator, Spectrum
@@ -16,7 +17,7 @@ import matplotlib.pyplot as plt
 from BeatTracker import *
 
 if len(sys.argv) != 2:
-	print 'Usage : ', sys.argv[0], ' <filename>'
+	print('Usage : ', sys.argv[0], ' <filename>')
 	exit()
 
 filename = sys.argv[1]	
@@ -27,15 +28,15 @@ audio = loader()
 audio = audio[44100:]
 
 # # ================== Bpm estimation and beat tracking ================== 
-print 'Extracting beat information...'
+print('Extracting beat information...')
 beatTracker = BeatTracker()
 beatTracker.run(audio)
 beats = beatTracker.getBeats()
 bpm = beatTracker.getBpm()
 phase = beatTracker.getPhase()
 beats = beats - phase
-print 'Bpm: ', bpm
-print 'Frame size in samples: ', 44100 * (60.0/bpm)
+print('Bpm: ', bpm)
+print('Frame size in samples: ', 44100 * (60.0/bpm))
 
 
 #  ================== Construct self-similarity matrix and perform analysis  ================== 
@@ -68,7 +69,7 @@ for start_sample_offset_beats in range(4):
 	matrices[start_sample_offset_beats] = 1 - pairwise_distances(pool['lowlevel.mfcc' + str(start_sample_offset_beats)],\
 		pool['lowlevel.mfcc' + str(start_sample_offset_beats)],metric='cosine')
 		
-	print np.shape(pool['lowlevel.mfcc'+ str(start_sample_offset_beats)] )
+	print(np.shape(pool['lowlevel.mfcc'+ str(start_sample_offset_beats)] ))
 	
 	# Step 3: stretch the results to (0,1)
 	imgNorm = MinMaxScaler()
@@ -88,5 +89,5 @@ for start_sample_offset_beats in range(4):
 	# Calculate where the downbeat should be
 	pool.add('result', np.sum(np.abs(np.diff(matrices[start_sample_offset_beats]))))
 		
-print pool['result']
+print(pool['result'])
 plt.show()

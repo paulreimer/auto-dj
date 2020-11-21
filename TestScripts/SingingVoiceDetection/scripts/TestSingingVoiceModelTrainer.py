@@ -14,6 +14,7 @@
 	36780 6963 (55 train songs)
 	25572 4281 (38 test songs)
 '''
+from __future__ import print_function
 
 from song import Song
 from songcollection import SongCollection
@@ -112,7 +113,7 @@ if __name__ == '__main__':
 	def extract_features_from_songs(songs, annotations_all_songs):
 		pool = Pool()
 		for song, annotations in zip(songs, annotations_all_songs):
-			print 'Processing {}'.format(song.title)
+			print('Processing {}'.format(song.title))
 			song.open()
 			song.openAudio()
 			
@@ -175,7 +176,7 @@ if __name__ == '__main__':
 	if not annot_files_exist():
 		train_songs, train_annotations = get_songs_and_annots(traindir)
 		test_songs, test_annotations = get_songs_and_annots(testdir)
-		print '{} training files, {} test files'.format(len(train_songs), len(test_songs))
+		print('{} training files, {} test files'.format(len(train_songs), len(test_songs)))
 		X_train, y_train, t_train = extract_features_from_songs(train_songs, train_annotations)
 		X_test, y_test, t_test = extract_features_from_songs(test_songs, test_annotations)
 		
@@ -229,8 +230,8 @@ if __name__ == '__main__':
 		])
 	X_train = X_train[:,cur_feature_mask]
 	X_test = X_test[:,cur_feature_mask]
-	print 'X_train: {}'.format(X_train.shape)
-	print 'X_test: {}'.format(X_test.shape)
+	print('X_train: {}'.format(X_train.shape))
+	print('X_test: {}'.format(X_test.shape))
 	
 	y_val_all = []
 	t_val_all = []
@@ -239,20 +240,20 @@ if __name__ == '__main__':
 		for gamma in [0.01]: # Gamma > 0.01: high precision, low recall; < 0.01: other way around
 			for C in [1.0]:
 				
-				print 'Results for C={:.3f}, gamma={}'.format(C,gamma)
+				print('Results for C={:.3f}, gamma={}'.format(C,gamma))
 				scores_train = []
 				scores_val   = []
 				scores_val_filter_only = []
 				for cur_fold in range(N_folds):
-					print '{} out of {} folds'.format(cur_fold, N_folds)
+					print('{} out of {} folds'.format(cur_fold, N_folds))
 					cur_fold_test_files = files[cur_fold*N_files/N_folds:(cur_fold+1)*N_files/N_folds]
 					cur_fold_train_files = [f for f in files if f not in cur_fold_test_files]
 					cur_fold_mask = np.array([t in cur_fold_train_files for t in t_train])
 					
 					X_train_cv = X_train[cur_fold_mask,:]
 					y_train_cv = y_train[cur_fold_mask]
-					print X_train_cv.shape
-					print y_train_cv.shape, y_train_cv[y_train_cv == 1].shape
+					print(X_train_cv.shape)
+					print(y_train_cv.shape, y_train_cv[y_train_cv == 1].shape)
 					X_val_cv = X_train[np.logical_not(cur_fold_mask),:]
 					y_val_cv = y_train[np.logical_not(cur_fold_mask)]
 					t_val_cv = t_train[np.logical_not(cur_fold_mask)]
@@ -265,10 +266,10 @@ if __name__ == '__main__':
 					model.fit(X_train_scaled, y_train_cv)
 					
 					blub = calculate_scores(model,scaler.transform(X_train_cv), y_train_cv)
-					print blub
+					print(blub)
 					scores_train.append(blub)
 					blub = calculate_scores(model,scaler.transform(X_val_cv), y_val_cv)
-					print blub
+					print(blub)
 					scores_val.append(blub)
 					
 					y_val_all.extend(model.predict(scaler.transform(X_val_cv)))
@@ -287,7 +288,7 @@ if __name__ == '__main__':
 				#~ acc, prec, recall, f1 = tuple(np.average(scores_val_filter_only,axis=0))
 				acc2, prec2, recall2, f12 = tuple(np.average(scores_val,axis=0))
 				#~ print 'TRAIN acc: {:.3f}, prec: {:.3f}, recall: {:.3f}, f1: {:.3f}'.format(acc, prec, recall, f1)
-				print 'TRAIN: {:.3f} {:.3f} {:.3f} {:.3f}; VAL:{:.3f} {:.3f} {:.3f} {:.3f}'.format(acc, prec, recall, f1,acc2, prec2, recall2, f12)
+				print('TRAIN: {:.3f} {:.3f} {:.3f} {:.3f}; VAL:{:.3f} {:.3f} {:.3f} {:.3f}'.format(acc, prec, recall, f1,acc2, prec2, recall2, f12))
 	
 	np.save('singingvoice_y_val.bin', y_val_all)
 	np.save('singingvoice_t_val.bin', t_val_all)
@@ -298,10 +299,10 @@ if __name__ == '__main__':
 	#~ model = sklearn.linear_model.LogisticRegression(C=1.0,class_weight='balanced')
 	model = sklearn.svm.SVC(C=1.0, gamma=0.01, probability=False, tol=0.001,class_weight='balanced')
 	model.fit(X_train_scaled, y_train)
-	print calculate_scores(model,scaler.transform(X_train), y_train)
-	print calculate_scores(model,scaler.transform(X_test), y_test)
-	print len(y_train), np.sum(y_train == 1)
-	print len(y_test), np.sum(y_test == 1)
+	print(calculate_scores(model,scaler.transform(X_train), y_train))
+	print(calculate_scores(model,scaler.transform(X_test), y_test))
+	print(len(y_train), np.sum(y_train == 1))
+	print(len(y_test), np.sum(y_test == 1))
 	
 	#~ joblib.dump(scaler, 'singingvoice_scaler.pkl')
 	#~ joblib.dump(model, 'singingvoice_model.pkl')		

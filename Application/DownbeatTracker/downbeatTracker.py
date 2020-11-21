@@ -1,6 +1,8 @@
+from __future__ import print_function
+from __future__ import absolute_import
 import numpy as np
 import sys, os
-import featureLoudness, featureMFCC, featureOnsetIntegral, featureOnsetIntegralCsd, featureOnsetIntegralHfc
+from . import featureLoudness, featureMFCC, featureOnsetIntegral, featureOnsetIntegralCsd, featureOnsetIntegralHfc
 from sklearn.externals import joblib	# Model persistence
 
 feature_modules = [featureLoudness, featureMFCC, featureOnsetIntegral, featureOnsetIntegralCsd, featureOnsetIntegralHfc] 
@@ -88,6 +90,6 @@ class DownbeatTracker:
 		# The audio got trimmed, so make sure the downbeat index is offset by the correct amount!
 		downbeatIndex = ((4-np.argmax(sum_log_probas)) + trim_start_beat) % 4
 		
-		print trim_start_beat, sum_log_probas, downbeatIndex, trim_start_beat
+		print(trim_start_beat, sum_log_probas, downbeatIndex, trim_start_beat)
 		
 		return song.beats[downbeatIndex::4]

@@ -1,6 +1,7 @@
 '''
 Quick test script to test the song similarity method using the DTW algorithm
 '''
+from __future__ import print_function
 
 # Test if saving the onset curve worked
 from song import Song
@@ -18,9 +19,9 @@ s2.open()
 s2.openAudio()
 
 start1 = (64 + 0)*4
-print s1.beats[start1], s1.tempo
+print(s1.beats[start1], s1.tempo)
 start2 = (80 + 0)*4
-print s2.beats[start2], s2.tempo
+print(s2.beats[start2], s2.tempo)
 
 from scipy.interpolate import interp1d
 
@@ -30,15 +31,15 @@ baudio = s2.audio[int(s2.beats[start2]*44100):int(s2.beats[start2+4*4]*44100):44
 baudio = baudio *10 
 c = s1.getOnsetCurveFragment(start1,start1 + 4*4)
 c = np.zeros(a.shape)
-print a.size, b.size
+print(a.size, b.size)
 L = min(a.size,b.size,c.size)
 
 from tracklister import calculateOnsetSimilarity
-print 'aa', calculateOnsetSimilarity(a,a)
-print 'bb', calculateOnsetSimilarity(b,b)
-print 'ab', calculateOnsetSimilarity(a,b)
-print 'ac', calculateOnsetSimilarity(a,c)
-print 'bc', calculateOnsetSimilarity(b,c)
+print('aa', calculateOnsetSimilarity(a,a))
+print('bb', calculateOnsetSimilarity(b,b))
+print('ab', calculateOnsetSimilarity(a,b))
+print('ac', calculateOnsetSimilarity(a,c))
+print('bc', calculateOnsetSimilarity(b,c))
 
 
 plt.plot(np.linspace(0,1,L-2), a[:L-2],c='grey')

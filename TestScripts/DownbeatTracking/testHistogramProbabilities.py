@@ -4,6 +4,7 @@
 	
 	python testHistogramProbabilities ../music/somesong.mp3
 '''
+from __future__ import print_function
 
 # Detect downbeats on every frame of the song and visualise where it made most mistakes
 
@@ -27,7 +28,7 @@ if __name__ == '__main__':
 	feature_modules = [featureLoudness, featureMFCC, featureOnsetIntegral, featureOnsetIntegralCsd, featureOnsetIntegralHfc] 
 	
 	if len(sys.argv) <= 2:
-		print 'Usage: ', sys.argv[0], ' <filename>'
+		print('Usage: ', sys.argv[0], ' <filename>')
 	
 	# Load the trained models
 	model = joblib.load('model.pkl') 
@@ -81,7 +82,7 @@ if __name__ == '__main__':
 	# => Plot each trajectory!
 	# => Compute histogram
 	
-	print 4-downbeatIndex, np.argmax(sum_log_probas), sum_log_probas
+	print(4-downbeatIndex, np.argmax(sum_log_probas), sum_log_probas)
 	
 	# Plot things
 	#~ plt.figure(1)

@@ -1,6 +1,7 @@
 '''
 	Quick script to visualize the difference between the HFC and Melflux ODFs
 '''
+from __future__ import print_function
 
 from song import Song
 import sys
@@ -23,7 +24,7 @@ odf_mel = OnsetDetection(method = 'melflux')
 for frame in FrameGenerator(song.audio, frameSize = 1024, hopSize = 512):
 	pool.add('audio.windowed_frames', w(frame))	
 fft_result = fft(pool['audio.windowed_frames']).astype('complex64')
-print fft_result.shape
+print(fft_result.shape)
 fft_result_mag = np.absolute(fft_result)
 fft_result_ang = np.angle(fft_result)
 

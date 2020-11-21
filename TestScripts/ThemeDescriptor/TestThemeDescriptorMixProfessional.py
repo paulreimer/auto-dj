@@ -1,3 +1,4 @@
+from __future__ import print_function
 # Calculate the Theme Descriptor features for each "odd" (uneven) 30 second segment in a DJ mix
 # This is done to validate that the descriptor indeed describes if music fits together: in a DJ mix, songs surely fit together, so consecutive
 # segments must lie close together in the feature space
@@ -63,12 +64,12 @@ def calculateThemeDescriptor(audio):
 	return song_theme_descriptor
 	
 # ---------------------Analyse this mix ---------------------------
-print 'Loading audio'
+print('Loading audio')
 title = sys.argv[1]
 loader = MonoLoader(filename = title)
 audio = loader().astype('single')
 
-print 'Audio loaded!'
+print('Audio loaded!')
 
 start_sample = 44100 * 30
 stop_sample = audio.size
@@ -80,12 +81,12 @@ hop_size = 44100 * HOP_S
 pool = Pool()
 
 for idx in range(start_sample, stop_sample - length_samples, hop_size):
-	print 'Analysed until {:.2f}'.format((idx/44100.0)/60)
+	print('Analysed until {:.2f}'.format((idx/44100.0)/60))
 	start_idx = idx
 	end_idx = idx + length_samples
 	fragment = audio[start_idx : end_idx]
 	theme_descr = calculateThemeDescriptor(fragment)
-	print theme_descr
+	print(theme_descr)
 	pool.add('theme_descriptors', theme_descr.tolist()[0])
 	
 # --------------------- Load all audio files ---------------------------
@@ -117,7 +118,7 @@ for P1,P2 in zip(X[:-1,:],X[1:,:]):
 		dist = euclidean_distance(P1,P)
 		if dist < distance_path:
 			num_songs_closer += 1
-	print distance_path, num_songs_closer
+	print(distance_path, num_songs_closer)
 
 from mpl_toolkits.mplot3d import Axes3D
 #~ fig = plt.figure()

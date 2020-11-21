@@ -1,3 +1,4 @@
+from __future__ import print_function
 from song import Song
 from songcollection import SongCollection
 import sys
@@ -75,7 +76,7 @@ if __name__ == '__main__':
 	plt.imshow(A,aspect='auto',interpolation='none')
 	plt.show()
 	X = pca.fit_transform(A)
-	print pca.explained_variance_ 
+	print(pca.explained_variance_) 
 
 	plt.figure()  
 	plt.scatter(X[:,0],X[:,1])

@@ -4,6 +4,7 @@
 	Might need additional changes to be compatible with the latest version of the beat and downbeat tracker.
 	Kept here as a reference for later.
 '''
+from __future__ import print_function
 
 
 from BeatTracker import * 
@@ -42,7 +43,7 @@ def loadAnnotationFile(directory, song_title, prefix):
 if __name__ == '__main__':
 	
 	if len(sys.argv) != 2:
-		print 'Usage: ', sys.argv[0], ' <directory>'
+		print('Usage: ', sys.argv[0], ' <directory>')
 		exit()
 	
 	directory = sys.argv[1]
@@ -76,7 +77,7 @@ if __name__ == '__main__':
 	for i in range(2):
 		f = files[i%2]
 		# Detect beat and downbeat
-		print directory + f
+		print(directory + f)
 		loader = essentia.standard.MonoLoader(filename = directory + f)
 		audio[i] = loader()
 	
@@ -96,7 +97,7 @@ if __name__ == '__main__':
 			beats = loadAnnotationFile(directory, f_stripped, ANNOT_BEATS_PREFIX)
 			downbeats = loadAnnotationFile(directory, f_stripped, ANNOT_DOWNB_PREFIX)
 		except Exception as e:
-			print e
+			print(e)
 			continue
 		
 		downbeatIndex = 0
@@ -111,14 +112,14 @@ if __name__ == '__main__':
 		
 		start_s = downbeats[index + offset[downbeatIndex]]
 		end_s = downbeats[index + 1 + offset[downbeatIndex]]
-		print start_s - end_s
+		print(start_s - end_s)
 		index = index + 1
 		start = start_s * 44100
 		end = end_s * 44100
 		
 		#song = np.append(song, audio[i%2][start:end])
 		toPlay = audio[i%2][start:end]
-		print toPlay.dtype, len(toPlay), len(toPlay)/44100.0
+		print(toPlay.dtype, len(toPlay), len(toPlay)/44100.0)
 		stream.write(toPlay, num_frames=len(toPlay), exception_on_underflow=True)
 		print(len(audio[i%2][start:end]) / 44100.0)
 		

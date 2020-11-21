@@ -5,6 +5,7 @@
 	
 	
 '''
+from __future__ import print_function
 
 import numpy as np
 import sys, os, importlib, time
@@ -151,7 +152,7 @@ def getFeaturesForFile(directory, file_name, feature_modules, forceRecalculateFe
 	
 	# Get the song title
 	song_title, song_ext = os.path.splitext(os.path.basename(file_name))
-	print 'Processing ' + song_title
+	print('Processing ' + song_title)
 	
 	# Load the annotated downbeat file
 	beats = loadAnnotationFile(directory, song_title, ANNOT_BEATS_PREFIX)
@@ -183,11 +184,11 @@ def getFeaturesForFile(directory, file_name, feature_modules, forceRecalculateFe
 	for module in feature_modules:
 		if not feature_file_exists(directory, song_title, module.__name__) or forceRecalculateFeatures:
 			# Recalculate the features
-			print '> Recalculating ', module.__name__
+			print('> Recalculating ', module.__name__)
 			absolute_feature_submatrix = module.feature_allframes(audio, beats, frame_indexer)
 			write_features_to_file(absolute_feature_submatrix, labels_cur_file, directory, song_title, module.__name__)
 		else:
-			print '> Reading ', module.__name__
+			print('> Reading ', module.__name__)
 			# Load the features from the input files
 			absolute_feature_submatrix = read_features_from_file(directory, song_title, module.__name__)
 		
@@ -224,7 +225,7 @@ def getFeaturesAndLabelsFromDirectory(directory, feature_modules, forceRecalcula
 			try:
 				features_cur_file, labels_cur_file = getFeaturesForFile(directory, f, feature_modules, forceRecalculateFeatures)
 			except UnannotatedException as e:
-				print e
+				print(e)
 				continue
 				
 			# Add the features to the feature matrix
@@ -237,7 +238,7 @@ def getFeaturesAndLabelsFromDirectory(directory, feature_modules, forceRecalcula
 			
 			num_frames_per_song.append(np.shape(features_cur_file)[0])
 			
-	print 'Features dimen: ', np.shape(features)
+	print('Features dimen: ', np.shape(features))
 	labels = np.array(labels)
 	num_frames_per_song = np.array(num_frames_per_song)
 	return (features, labels, num_frames_per_song)
@@ -245,7 +246,7 @@ def getFeaturesAndLabelsFromDirectory(directory, feature_modules, forceRecalcula
 if __name__ == '__main__':
 	
 	if len(sys.argv) < 2:
-		print 'Usage: ', sys.argv[0], ' featureModule1.py ... featureModuleN.py'
+		print('Usage: ', sys.argv[0], ' featureModule1.py ... featureModuleN.py')
 		exit()
 	
 	# Disable obnoxious INFO Log
@@ -266,8 +267,8 @@ if __name__ == '__main__':
 			if arg in options.keys():
 				options[arg] = True
 			else:
-				print arg + ' is not a valid option!'
-				print 'Options: ' + str(options.keys())
+				print(arg + ' is not a valid option!')
+				print('Options: ' + str(options.keys()))
 				exit()
 		else:
 			# Parse feature module
@@ -281,26 +282,26 @@ if __name__ == '__main__':
 	model, scaler = None, None
 	
 	if options['--reuseModel']:
-		print 'Loading model from file...'
+		print('Loading model from file...')
 		try:
 			model = joblib.load(MODEL_FILE) 
 			scaler = joblib.load(SCALER_FILE)
 		except:
 			options['--reuseModel'] = False
-		print 'Loading unscaled feature matrix and labels from csv file...'
+		print('Loading unscaled feature matrix and labels from csv file...')
 		matrix, labels, num_frames_per_song = read_features_and_labels_from_file('./features_train.csv', True)
-		print matrix.shape
+		print(matrix.shape)
 		matrix = scaler.transform(matrix)
 	
 	if not options['--reuseModel']:
 		# Get training data
 		if not options['--reuseMatrix']:
-			print 'Building feature matrix from audio files...'
+			print('Building feature matrix from audio files...')
 			matrix, labels, num_frames_per_song = getFeaturesAndLabelsFromDirectory(directory, feature_modules, options['--forceRecalculate'])
-			print matrix.shape, labels.shape, num_frames_per_song.shape
+			print(matrix.shape, labels.shape, num_frames_per_song.shape)
 			write_features_and_labels_to_file(matrix, labels, './features_train.csv', num_frames_per_song)
 		else:
-			print 'Loading unscaled feature matrix and labels from csv file...'
+			print('Loading unscaled feature matrix and labels from csv file...')
 			matrix, labels, num_frames_per_song = read_features_and_labels_from_file('./features_train.csv', hasSongRowIndices = True)
 			
 		# Scale the features
@@ -309,7 +310,7 @@ if __name__ == '__main__':
 		
 		# Learn model on training data		
 		if not options['--noFitModel']:
-			print 'Fitting model...'
+			print('Fitting model...')
 			#~ model = svm.SVC(C=1.0, kernel='rbf', gamma='auto', tol=0.001, cache_size=1000)
 			
 			# Time how long it takes to fit
@@ -318,15 +319,15 @@ if __name__ == '__main__':
 			time1 = time.time()
 			model.fit(matrix, labels)
 			time2 = time.time()
-			print 'Fitting model took %0.3f ms' % ((time2 - time1) * 1000.0)
+			print('Fitting model took %0.3f ms' % ((time2 - time1) * 1000.0))
 			# Save model data
 			joblib.dump(model, MODEL_FILE) 
 			joblib.dump(scaler, SCALER_FILE)
 		else:
-			print 'Skip fitting model!'
+			print('Skip fitting model!')
 	
 	# Get test data
-	print 'Loading test data...'
+	print('Loading test data...')
 	if not options['--reuseTestMatrix']:
 		matrix_test, labels_test, num_frames_per_song_test = getFeaturesAndLabelsFromDirectory(test_directory, feature_modules, options['--forceRecalculate'])
 		write_features_and_labels_to_file(matrix_test, labels_test, './features_test.csv', num_frames_per_song_test)
@@ -362,14 +363,14 @@ if __name__ == '__main__':
 	
 	
 	# See how well we did
-	print 'Mean accuracy train: ' + str(model.score(matrix, labels))
-	print 'Mean accuracy test: ' + str(model.score(matrix_test, labels_test))
+	print('Mean accuracy train: ' + str(model.score(matrix, labels)))
+	print('Mean accuracy test: ' + str(model.score(matrix_test, labels_test)))
 	
 	# Print log loss
 	loss_train = log_loss(labels, model.predict_proba(matrix))
 	loss_test = log_loss(labels_test, model.predict_proba(matrix_test))
-	print 'Logloss train: ' + str(loss_train)
-	print 'Logloss test: ' + str(loss_test)
+	print('Logloss train: ' + str(loss_train))
+	print('Logloss test: ' + str(loss_test))
 	
 	# See how it does on a SONG basis
 	indices = np.cumsum(num_frames_per_song)
@@ -393,8 +394,8 @@ if __name__ == '__main__':
 		if labels[indices[i]] != np.argmax(sum_log_probas):
 			errors += 1
 		
-		print int(labels[indices[i]]), np.argmax(sum_log_probas), sum_log_probas
-	print 'Wrongly detected downbeat of ', errors / float(len(num_frames_per_song) - 1), ' songs in training set (', errors, ' out of ', float(len(num_frames_per_song) - 1) , ')'
+		print(int(labels[indices[i]]), np.argmax(sum_log_probas), sum_log_probas)
+	print('Wrongly detected downbeat of ', errors / float(len(num_frames_per_song) - 1), ' songs in training set (', errors, ' out of ', float(len(num_frames_per_song) - 1) , ')')
 
 	
 	indices = np.cumsum(num_frames_per_song_test)
@@ -410,5 +411,5 @@ if __name__ == '__main__':
 			sum_log_probas += permuted_row
 		if labels_test[indices[i]] != np.argmax(sum_log_probas):
 			errors += 1
-		print int(labels_test[indices[i]]), np.argmax(sum_log_probas), sum_log_probas
-	print 'Wrongly detected downbeat of ', errors / float(len(num_frames_per_song_test) - 1) ,' songs in test set (', errors, ' out of ', float(len(num_frames_per_song_test) - 1), ')' 
+		print(int(labels_test[indices[i]]), np.argmax(sum_log_probas), sum_log_probas)
+	print('Wrongly detected downbeat of ', errors / float(len(num_frames_per_song_test) - 1) ,' songs in test set (', errors, ' out of ', float(len(num_frames_per_song_test) - 1), ')') 

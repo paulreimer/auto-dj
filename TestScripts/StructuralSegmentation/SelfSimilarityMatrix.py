@@ -1,3 +1,4 @@
+from __future__ import print_function
 from essentia import *
 from essentia.standard import MonoLoader, Spectrum, Windowing, MFCC, FrameGenerator, Spectrum
 from sklearn.metrics.pairwise import pairwise_distances
@@ -16,7 +17,7 @@ Do this four times, i.e. once for every candidate downbeat candidate
 '''
 
 if len(sys.argv) != 2:
-	print 'Usage : ', sys.argv[0], ' <filename>'
+	print('Usage : ', sys.argv[0], ' <filename>')
 	exit()
 
 filename = sys.argv[1]	
@@ -26,15 +27,15 @@ audio = loader()
 
 # Beat tracking
 
-print 'Extracting beat information...'
+print('Extracting beat information...')
 beatTracker = BeatTracker()
 beatTracker.run(audio)
 beats = beatTracker.getBeats()
 bpm = beatTracker.getBpm()
 phase = beatTracker.getPhase()
 beats = beats - phase
-print 'Bpm: ', bpm
-print 'Frame size in samples: ', 44100 * (60.0/bpm)
+print('Bpm: ', bpm)
+print('Frame size in samples: ', 44100 * (60.0/bpm))
 
 
 # Followed approach from Foote
@@ -63,7 +64,7 @@ for frame in FrameGenerator(audio[start_sample:], frameSize = FRAME_SIZE, hopSiz
 	pool.add('lowlevel.mfcc_bands', mfcc_bands)
 
 # Step 2: correlate
-print np.shape(pool['lowlevel.mfcc'] )
+print(np.shape(pool['lowlevel.mfcc'] ))
 matrix = 1 - pairwise_distances(pool['lowlevel.mfcc'],metric='cosine')
 
 plt.imshow(matrix, aspect='auto', interpolation='nearest', vmin=np.percentile(matrix, 1.0), vmax=np.percentile(matrix, 99.0))

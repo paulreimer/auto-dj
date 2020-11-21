@@ -1,4 +1,5 @@
 ''' Open .bin CQT feature file(s) and show it '''
+from __future__ import print_function
 
 import sys, os
 import matplotlib.pyplot as plt
@@ -8,7 +9,7 @@ filenames = sys.argv[1:]
 if os.path.isdir(filenames[0]):
 	directory = filenames[0]
 	filenames = sorted([f for f in os.listdir(directory) if f[-4:] == '.bin'])
-	print filenames
+	print(filenames)
 else:
 	directory = ''
 	

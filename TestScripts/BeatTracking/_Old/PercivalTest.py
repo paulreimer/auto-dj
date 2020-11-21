@@ -1,3 +1,4 @@
+from __future__ import print_function
 import numpy as np
 from scipy.signal import medfilt
 
@@ -11,25 +12,25 @@ import sys
 try:
     filename = sys.argv[1]
 except:
-    print "usage:", sys.argv[0], "<audiofile>"
+    print("usage:", sys.argv[0], "<audiofile>")
     sys.exit()
 
 # Load the libraries
-print 'Loading Essentia...'
+print('Loading Essentia...')
 from essentia import *
 from essentia.standard import *
 import matplotlib.pyplot as plt # For plotting
 
 # Load the audio
-print 'Loading audio file "', filename, '" ...'
+print('Loading audio file "', filename, '" ...')
 loader = essentia.standard.MonoLoader(filename = filename)
 audio = loader()
 
 # Calculate beat positions
-print 'Calculating beat positions...'
+print('Calculating beat positions...')
 beat_tracker = PercivalBpmEstimator(minBPM=160, maxBPM=190)
 bpm = beat_tracker(audio)
-print '> BPM = ', bpm
+print('> BPM = ', bpm)
 
 #~ # Overlay the audio file with onsets
 #~ onsetMarker = AudioOnsetsMarker(onsets = beats)
