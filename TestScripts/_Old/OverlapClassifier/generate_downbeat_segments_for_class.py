@@ -14,7 +14,10 @@
 	python generate_downbeats_for_class.py ../music/test/
 '''
 from __future__ import print_function
+from __future__ import division
 
+from builtins import range
+from past.utils import old_div
 import sys, os, glob, csv
 
 from essentia import *
@@ -68,7 +71,7 @@ def calculateFeaturesForDownbeat(audio):
 	max_spec = np.max(spec_db) 
 	min_spec = np.min(spec_db)
 	if max_spec != min_spec:
-		spec_db = (spec_db - min_spec) / (max_spec - min_spec)
+		spec_db = old_div((spec_db - min_spec), (max_spec - min_spec))
 	else:
 		print('Max equals min!')
 		spec_db = (spec_db - np.min(spec_db))
@@ -79,8 +82,8 @@ def calculateFeaturesForDownbeat(audio):
 	for i_freq in range(NUM_OCTAVES*2):			# Frequency resolution: every half octave; hop size quarter octave
 		features_cur_freq_window = []
 		# Window along frequency axis
-		f_bin_start = (i_freq * BINS_PER_OCTAVE) / 2
-		f_bin_end = ((i_freq + 1) * BINS_PER_OCTAVE) / 2
+		f_bin_start = old_div((i_freq * BINS_PER_OCTAVE), 2)
+		f_bin_end = old_div(((i_freq + 1) * BINS_PER_OCTAVE), 2)
 		for i_time in range(4 * 4 * 2 - 1): 	# Aggregate along time axis in frames of one quarter beat, hop size an eight dbeat
 			# Window along time axis
 			frame_start = int(i_time * NUM_FRAMES / 32.0)
@@ -124,7 +127,7 @@ def getAudioSegmentAtDownbeat(song, start_db):
 	start_idx = int(start_db_s * 44100)
 	end_idx = int(end_db_s * 44100)
 	audio = song.audio[start_idx:end_idx]
-	audio = time_stretch_sola(audio, song.tempo / TEMPO, song.tempo, 0.0)
+	audio = time_stretch_sola(audio, old_div(song.tempo, TEMPO), song.tempo, 0.0)
 	audio = audio[:LENGTH_SEGMENT]
 	return audio
 		
@@ -148,7 +151,7 @@ if __name__ == '__main__':
 				break
 			i += 1
 		# Open the current song, but make sure you don't need to open it twice
-		if f not in songs.keys():
+		if f not in list(songs.keys()):
 			song = Song(os.path.join(directory, f))
 			song.open()
 			song.openAudio()
@@ -161,7 +164,7 @@ if __name__ == '__main__':
 	with open('output/features.csv', 'w+') as csvfile:
 		csvwriter = csv.writer(csvfile)
 			
-		for _, song in songs.iteritems():
+		for _, song in songs.items():
 			
 			# Store the generated audio afterwards to evaluate
 			audio_out_good = np.array((1,0)).astype('single')
@@ -181,7 +184,7 @@ if __name__ == '__main__':
 				# Open a song for bad mixing
 				mixed_song = song
 				while mixed_song == song:
-					rand_song_key = (songs.keys())[int(random() * len(songs.keys()))]
+					rand_song_key = (list(songs.keys()))[int(random() * len(list(songs.keys())))]
 					mixed_song = songs[rand_song_key]
 				
 				# Extract necessary info from the mixed song

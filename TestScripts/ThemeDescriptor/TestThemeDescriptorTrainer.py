@@ -1,4 +1,5 @@
 from __future__ import print_function
+from builtins import zip
 from song import Song
 from songcollection import SongCollection
 import sys

@@ -1,5 +1,6 @@
 from __future__ import print_function
 #from BeatTracker import *
+from builtins import str
 import numpy as np
 import sys, os
 import essentia

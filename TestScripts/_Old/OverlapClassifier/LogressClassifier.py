@@ -3,7 +3,11 @@
 	Can also be copied to the Application directory and used to visualize accuracy over one song. Uncomment the necessary lines for that
 '''
 from __future__ import print_function
+from __future__ import division
 
+from builtins import zip
+from builtins import range
+from past.utils import old_div
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
 from sklearn.externals import joblib
@@ -128,13 +132,13 @@ def train():
 				predicted = model.predict_proba(X_val_new)[:,1]
 				loss_val += log_loss(y_val, predicted)
 				#~ print 'Support vectors: ' + str(model.n_support_)
-				print('\tC = {:.2} gamma = {:.2} Train = {:.2}, {:.2} Val = {:.2}, {:.2}'.format(C, gamma, score_train/(cv_iter+1), loss_train/(cv_iter+1), score_val/(cv_iter+1), loss_val/(cv_iter+1))) 
+				print('\tC = {:.2} gamma = {:.2} Train = {:.2}, {:.2} Val = {:.2}, {:.2}'.format(C, gamma, old_div(score_train,(cv_iter+1)), old_div(loss_train,(cv_iter+1)), old_div(score_val,(cv_iter+1)), old_div(loss_val,(cv_iter+1)))) 
 				
 			# Printing
-			score_train = score_train / num_cv
-			score_val = score_val / num_cv
-			loss_train = loss_train / num_cv
-			loss_val = loss_val / num_cv
+			score_train = old_div(score_train, num_cv)
+			score_val = old_div(score_val, num_cv)
+			loss_train = old_div(loss_train, num_cv)
+			loss_val = old_div(loss_val, num_cv)
 			
 			scores_val.append(score_val)
 			scores_train.append(score_train)
@@ -188,15 +192,15 @@ def calculateFeaturesForDownbeat(audio):
 	spectogram = cqt(audio, sr=44100, bins_per_octave=BINS_PER_OCTAVE, n_bins=BINS_PER_OCTAVE*NUM_OCTAVES, hop_length=512)
 	spec_db = np.absolute(spectogram)
 	spec_db = librosa.amplitude_to_db(spectogram, ref=np.max)
-	spec_db = (spec_db - np.min(spec_db)) / (np.max(spec_db) - np.min(spec_db))
+	spec_db = old_div((spec_db - np.min(spec_db)), (np.max(spec_db) - np.min(spec_db)))
 	# Statistics for each frequency bin (each row => aggregate over axis 1 = columns)
 	NUM_FRAMES = spectogram.shape[1]
 	features_per_half_octave = []
 	for i_freq in range(NUM_OCTAVES*2):			# Frequency resolution: every half octave
 		features_cur_freq_window = []
 		# Window along frequency axis
-		f_bin_start = (i_freq * BINS_PER_OCTAVE) / 2
-		f_bin_end = ((i_freq + 1) * BINS_PER_OCTAVE) / 2
+		f_bin_start = old_div((i_freq * BINS_PER_OCTAVE), 2)
+		f_bin_end = old_div(((i_freq + 1) * BINS_PER_OCTAVE), 2)
 		for i_time in range(4 * 4 * 2 - 1): 	# Aggregate along time axis in frames of one quarter beat, hop size an eight dbeat
 			# Window along time axis
 			frame_start = int(i_time * NUM_FRAMES / 32.0)
@@ -224,11 +228,11 @@ def evaluate_each_dbeat_of_song(path_to_file):
 	song.openAudio()
 	
 	TEMPO = 175.0
-	audio = time_stretch_sola(song.audio, song.tempo / TEMPO, song.tempo, 0.0)
+	audio = time_stretch_sola(song.audio, old_div(song.tempo, TEMPO), song.tempo, 0.0)
 	
 	features = []
 	for dbeat in song.downbeats:
-		dbeat_stretched = dbeat * song.tempo / TEMPO
+		dbeat_stretched = old_div(dbeat * song.tempo, TEMPO)
 		start_idx = int(dbeat_stretched * 44100)
 		audio_cur = audio[start_idx : start_idx + 60480]
 		

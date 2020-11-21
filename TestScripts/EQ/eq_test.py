@@ -1,6 +1,9 @@
 ''' Simple test script to mess with shelf filtering '''
 from __future__ import print_function
+from __future__ import division
 
+from builtins import range
+from past.utils import old_div
 import os, sys, random
 from essentia import *
 from essentia.standard import *
@@ -43,7 +46,7 @@ if __name__ == '__main__':
 	NUM_STEPS = 20
 	
 	
-	profile = np.append((np.arange(0, NUM_STEPS/2) / float(NUM_STEPS/2)), (NUM_STEPS/2 * [1]))
+	profile = np.append((np.arange(0, old_div(NUM_STEPS,2)) / float(old_div(NUM_STEPS,2))), (old_div(NUM_STEPS,2) * [1]))
 	print(profile)
 	
 	

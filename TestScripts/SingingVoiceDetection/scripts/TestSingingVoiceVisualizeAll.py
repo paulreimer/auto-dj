@@ -6,6 +6,8 @@
 '''
 from __future__ import print_function
 
+from builtins import zip
+from builtins import range
 from song import Song
 from songcollection import SongCollection
 import sys, os, csv
@@ -71,8 +73,8 @@ if __name__ == '__main__':
 				song = [s for s in sc.get_annotated() if s.title == title][0]
 				song.open()
 				plt.figure()
-				plt.fill_between(range(len(y_train[::3])),y_pred[::3],alpha=0.5,color='blue')
-				plt.fill_between(range(len(y_train[::3])),y_train[::3],alpha=0.5,color='red')
+				plt.fill_between(list(range(len(y_train[::3]))),y_pred[::3],alpha=0.5,color='blue')
+				plt.fill_between(list(range(len(y_train[::3]))),y_train[::3],alpha=0.5,color='red')
 				plt.show()
 				for y_true, y, t in zip(y_train[::4], y_pred[::4], song.downbeats):
 					print('{} {} {}'.format(y_true, y, t))

@@ -1,3 +1,8 @@
+from __future__ import division
+from builtins import zip
+from builtins import range
+from builtins import object
+from past.utils import old_div
 from essentia import *
 import songcollection
 from timestretching import time_stretch_sola, time_stretch_and_pitch_shift
@@ -100,7 +105,7 @@ def getAllMasterSwitchPoints(song, fade_type):
 	else:
 		raise Exception('Unknown fade type {}'.format(fade_type))
 	
-	return zip(cues,L_fade_in, L_fade_out)
+	return list(zip(cues,L_fade_in, L_fade_out))
 		
 def getAllSlaveCues(song, fade_type, min_playable_length = 32):
 	'''
@@ -131,7 +136,7 @@ def getAllSlaveCues(song, fade_type, min_playable_length = 32):
 	else:
 		raise Exception('Unknown fade type {}'.format(fade_type))
 		
-	return zip(cues, fade_in_lengths)
+	return list(zip(cues, fade_in_lengths))
 	
 
 def getMasterQueue(song, start_dbeat, cur_fade_type):
@@ -165,8 +170,8 @@ def getMasterQueue(song, start_dbeat, cur_fade_type):
 			max_fade_in_len = min(max_fade_in_len, doubleDropDbeat - start_dbeat - 1)
 			return doubleDropDbeat - max_fade_in_len, TYPE_DOUBLE_DROP, max_fade_in_len, fade_out_len
 	
-	P_roll = P_roll / (P_roll + P_chill)
-	P_chill = P_chill / (P_roll + P_chill)
+	P_roll = old_div(P_roll, (P_roll + P_chill))
+	P_chill = old_div(P_chill, (P_roll + P_chill))
 	
 	if P_roll > 0:	
 		
@@ -270,7 +275,7 @@ def calculateOnsetSimilarity(odf1, odf2):
 	# Best score is in scores[N], i.e. on the diagonal
 	return scores[N]
 	
-class TrackLister:
+class TrackLister(object):
 	
 	def __init__(self, song_collection):
 		self.songs = None 		# Ordered list of the songs in this tracklist
@@ -313,7 +318,7 @@ class TrackLister:
 			song.close()
 		songs_sorted = np.argsort(songs_distance_to_first_song)
 		# 2. Select songs that are close to this first song
-		indices_sorted = songs_sorted[:len(songs_sorted)/4]
+		indices_sorted = songs_sorted[:old_div(len(songs_sorted),4)]
 		# 3. Calculate the centroid of these songs
 		self.theme_centroid = np.average(np.array(songs_themes)[indices_sorted],axis=0)
 		
@@ -433,7 +438,7 @@ class TrackLister:
 				for odf_start_dbeat in range(0, transition_len_corr, odf_segment_len):
 					odf_master = master_song.getOnsetCurveFragment(master_cue_corr + odf_start_dbeat, min(master_cue_corr + odf_start_dbeat+odf_segment_len, master_cue_corr + transition_len_corr))
 					odf_slave = s.getOnsetCurveFragment(queue_slave_cur + odf_start_dbeat, min(queue_slave_cur+odf_start_dbeat+odf_segment_len, queue_slave_cur+transition_len_corr))
-					onset_similarity = calculateOnsetSimilarity(odf_master,odf_slave) / odf_segment_len
+					onset_similarity = old_div(calculateOnsetSimilarity(odf_master,odf_slave), odf_segment_len)
 					odf_scores.append(onset_similarity)
 				
 				singing_scores = []

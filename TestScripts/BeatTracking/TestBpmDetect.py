@@ -1,4 +1,7 @@
 from __future__ import print_function
+from __future__ import division
+from builtins import zip
+from past.utils import old_div
 import numpy as np
 import sys
 
@@ -67,7 +70,7 @@ for mag,phase in zip(fft_result_mag, fft_result_ang):
 print('Normalising result and half-wave rectifying it...')
 def adaptive_mean(x, N):
 	#TODO efficient implementation instead of convolve
-	return np.convolve(x, [1.0]*int(N), mode='same')/N
+	return old_div(np.convolve(x, [1.0]*int(N), mode='same'),N)
 	
 novelty_mean = adaptive_mean(pool['onsets.complex'], 16.0)
 # Step 2: half-wave rectify the result
@@ -77,7 +80,7 @@ novelty_hwr = (pool['onsets.complex'] - novelty_mean).clip(min=0)
 print('Autocorrelating resulting curve...')
 def autocorr(x):
 	result = np.correlate(x, x, mode='full')
-	return result[result.size/2:]
+	return result[old_div(result.size,2):]
 
 novelty_autocorr = autocorr(novelty_hwr)
 
@@ -87,9 +90,9 @@ print('Iterating over valid BPM values...')
 #valid_bpms = np.arange(170.0, 176.0, 0.01)
 valid_bpms = np.arange(MIN_VALID_BPM, MAX_VALID_BPM, 0.01)
 for bpm in valid_bpms:
-	num_frames_per_beat = (60.0 * 44100.0)/(512.0 * bpm) # TODO put this in a function
+	num_frames_per_beat = old_div((60.0 * 44100.0),(512.0 * bpm)) # TODO put this in a function
 	frames = (np.round(np.arange(0,np.size(novelty_autocorr),num_frames_per_beat)).astype('int'))[:-1] # Discard last value to prevent reading beyond array (last value rounded up for example)
-	pool.add('output.bpm', np.sum(novelty_autocorr[frames])/np.size(frames))
+	pool.add('output.bpm', old_div(np.sum(novelty_autocorr[frames]),np.size(frames)))
 
 bpm = valid_bpms[np.argmax(pool['output.bpm'])]
 print('Detected BPM: ', bpm)
@@ -97,19 +100,19 @@ print('Detected BPM: ', bpm)
 # Step 5: Calculate phase information
 # Valid phases in SECONDS
 valid_phases = np.arange(0.0, 60.0/bpm, 0.001)
-num_frames_per_beat_final = (60.0 * 44100.0)/(512.0 * bpm) #TODO put this in a function
+num_frames_per_beat_final = old_div((60.0 * 44100.0),(512.0 * bpm)) #TODO put this in a function
 
 for phase in valid_phases:
 	# Convert phase from seconds to frames
-	phase_frames = (phase * 44100.0) / (512.0)
+	phase_frames = old_div((phase * 44100.0), (512.0))
 	frames = (np.round(np.arange(phase_frames,np.size(novelty_hwr),num_frames_per_beat_final)).astype('int'))[:-1] # Discard last value to prevent reading beyond array (last value rounded up for example)
-	pool.add('output.phase', np.sum(novelty_hwr[frames])/np.size(frames))  
+	pool.add('output.phase', old_div(np.sum(novelty_hwr[frames]),np.size(frames)))  
 
 phase = valid_phases[np.argmax(pool['output.phase'])]
 print('Detected phase: ', phase)
 
 spb = 60./bpm #seconds per beat
-beats = (np.arange(phase, (np.size(audio)/44100) - spb + phase, spb).astype('single'))
+beats = (np.arange(phase, (old_div(np.size(audio),44100)) - spb + phase, spb).astype('single'))
 
 plt.subplot(511)
 plt.plot(audio[0*len(audio):0.01*len(audio)])

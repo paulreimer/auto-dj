@@ -1,3 +1,9 @@
+from __future__ import division
+from builtins import str
+from builtins import zip
+from builtins import range
+from builtins import object
+from past.utils import old_div
 from util import *
 import time
 from essentia import *
@@ -28,7 +34,7 @@ def normalizeAudioGain(audio, rgain, target = -10):
 	audio *= factor	
 	return audio
 
-class Song:
+class Song(object):
 	
 	def __init__(self, path_to_file):
 		
@@ -139,7 +145,7 @@ class Song:
 			logger.debug('Annotating structural segment boundaries of ' + self.title)
 			structuralSegmentator = StructuralSegmentator()
 			self.segment_indices, self.segment_types = structuralSegmentator.analyse(self)
-			writeAnnotFile(self.dir_, self.title, ANNOT_SEGMENT_PREFIX, zip(self.segment_indices, self.segment_types))			
+			writeAnnotFile(self.dir_, self.title, ANNOT_SEGMENT_PREFIX, list(zip(self.segment_indices, self.segment_types)))			
 		else:
 			self.loadAnnotSegments()
 			
@@ -163,7 +169,7 @@ class Song:
 			# Calculate the spectral contrast features for the audio frames that fall in the H segments
 			# Only the H segments are considered as these are most representative of the entire audio
 			FRAME_SIZE = 2048		# About 1 beats at 172 BPM and 44100 Hz sample rate
-			HOP_SIZE = FRAME_SIZE/2	# About 0.5 beat interval at 172 BPM 
+			HOP_SIZE = old_div(FRAME_SIZE,2)	# About 0.5 beat interval at 172 BPM 
 			
 			spec = Spectrum(size = FRAME_SIZE)
 			w = Windowing(type = 'hann')
@@ -295,8 +301,8 @@ class Song:
 			self.downbeats = [dbeat + songBeginPaddingSeconds for dbeat in self.downbeats]
 			self.downbeats = [i*4*beat_length_s for i in range(-self.segment_indices[0])] + self.downbeats
 			self.beats = [beat + songBeginPaddingSeconds for beat in self.beats]
-			self.beats = [i*beat_length_s for i in range(int(self.beats[0] / beat_length_s))] + self.beats
-			self.onset_curve = np.append(np.zeros((1,self.songBeginPadding / 512)), self.onset_curve) # 512 is hop size for OD curve calculation
+			self.beats = [i*beat_length_s for i in range(int(old_div(self.beats[0], beat_length_s)))] + self.beats
+			self.onset_curve = np.append(np.zeros((1,old_div(self.songBeginPadding, 512))), self.onset_curve) # 512 is hop size for OD curve calculation
 			offset = self.segment_indices[0] 
 			self.segment_indices = [idx - offset for idx in self.segment_indices]
 	
@@ -369,8 +375,8 @@ class Song:
 		# Parameters of the onset detection function calculation
 		HOP_SIZE = 512
 		SAMPLE_RATE = 44100
-		start_frame = int(SAMPLE_RATE * self.beats[start_beat_idx]) / HOP_SIZE
-		stop_frame = int(SAMPLE_RATE * self.beats[stop_beat_idx]) / HOP_SIZE
+		start_frame = old_div(int(SAMPLE_RATE * self.beats[start_beat_idx]), HOP_SIZE)
+		stop_frame = old_div(int(SAMPLE_RATE * self.beats[stop_beat_idx]), HOP_SIZE)
 		return self.onset_curve[start_frame:stop_frame]
 		
 	def markedForAnnotation(self):

@@ -1,3 +1,6 @@
+from builtins import zip
+from builtins import range
+from builtins import object
 import numpy as np
 import sys, os
 from sklearn.externals import joblib	# Model persistence
@@ -7,7 +10,7 @@ import featureLoudness, featureMFCC, featureOnsetIntegral, featureOnsetIntegralC
 DOWNBEAT_DIR = './_annot_downbeat_temp'
 feature_modules = [featureLoudness, featureMFCC, featureOnsetIntegral, featureOnsetIntegralCsd, featureOnsetIntegralHfc] 
 
-class DownbeatTracker:
+class DownbeatTracker(object):
 	'''
 		Detects the downbeat locations given the beat locations and audio
 	'''
@@ -25,7 +28,7 @@ class DownbeatTracker:
 
 	def getFeaturesForAudio(self, audio, beats):
 	
-		frame_indexer = range(4,len(beats) - 9) # -9 instead of -8 to prevent out-of-bound in featureLoudness
+		frame_indexer = list(range(4,len(beats) - 9)) # -9 instead of -8 to prevent out-of-bound in featureLoudness
 		
 		# Calculate the features on every frame in the audio
 		features_cur_file = None
@@ -47,7 +50,7 @@ class DownbeatTracker:
 		sum_log_probas = np.array([[0,0,0,0]], dtype='float64')		
 		permuted_row = [0] * 4
 		
-		for i, j, row in zip(range(len(probas)), np.array(range(len(probas))) % 4, probas):
+		for i, j, row in zip(list(range(len(probas))), np.array(list(range(len(probas)))) % 4, probas):
 			permuted_row[:4-j] = row[j:]
 			permuted_row[4-j:] = row[:j] # element i of permuted_row (i = 0,1,2,3) corresponds to the TRAJECTORY over the song starting with downbeat 0, 1, 2, 3
 			perm_row_np = np.array([permuted_row])

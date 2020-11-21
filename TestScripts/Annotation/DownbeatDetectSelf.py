@@ -1,4 +1,6 @@
 from __future__ import print_function
+from builtins import input
+from builtins import str
 from BeatTracker import *
 import numpy as np
 import sys, os
@@ -67,7 +69,7 @@ if __name__ == '__main__':
 			
 			print('Was the input correct? (a: 0, z:1, e:2, r:3, x:bpm wrong, t:play again)')
 			while len(userInput) != 1 or (userInput not in validOptions):
-				userInput = raw_input(':').lower()
+				userInput = input(':').lower()
 				if userInput == 't':
 					# Replay output
 					from subprocess import call

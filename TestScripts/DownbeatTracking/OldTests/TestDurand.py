@@ -4,7 +4,11 @@
 	
 '''
 from __future__ import print_function
+from __future__ import division
 
+from builtins import str
+from builtins import range
+from past.utils import old_div
 from essentia import *
 from essentia.standard import MonoLoader, Spectrum, Windowing, MFCC, FrameGenerator, Spectrum
 from sklearn.metrics.pairwise import pairwise_distances
@@ -43,7 +47,7 @@ print('Frame size in samples: ', 44100 * (60.0/bpm))
 # Has to happen on beat-aligned frames (cf paper)
 FRAME_SIZE = int(44100 * (60.0/bpm))
 HOP_SIZE = FRAME_SIZE
-frames_per_second = (44100.0 / FRAME_SIZE) * (FRAME_SIZE / HOP_SIZE)
+frames_per_second = (44100.0 / FRAME_SIZE) * (old_div(FRAME_SIZE, HOP_SIZE))
 beats = beats * frames_per_second
 spec = Spectrum(size = FRAME_SIZE - FRAME_SIZE % 2)
 w = Windowing(type = 'hann')
@@ -58,7 +62,7 @@ matrices = {}
 
 for start_sample_offset_beats in range(4):
 
-	start_sample = int((phase + start_sample_offset_beats) * (44100.0 * 60 / bpm))
+	start_sample = int((phase + start_sample_offset_beats) * (old_div(44100.0 * 60, bpm)))
 
 	# Step 1: Calculate framewise MFCC
 	for frame in FrameGenerator(audio[start_sample:], frameSize = FRAME_SIZE, hopSize = HOP_SIZE):

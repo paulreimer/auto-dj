@@ -1,4 +1,5 @@
 from __future__ import print_function
+from builtins import object
 import song
 from util import *
 import os
@@ -54,7 +55,7 @@ def distance_keys_circle_of_fifths(key1, scale1, key2, scale2):
 	idx2 = circle_of_fifths[scale2].index(key2)
 	return ((6+((idx2-idx1)%12))%12)-6
 	
-class SongCollection:
+class SongCollection(object):
 	
 	def __init__(self):
 		self.songs = []			# A list holding all (annotated) songs
@@ -69,14 +70,14 @@ class SongCollection:
 		for dir_ in self.directories:
 			# Keep a list of the annotated songs and their keys
 			songs_key_list = loadCsvAnnotationFile(dir_, ANNOT_KEY_PREFIX)
-			for title, key in songs_key_list.iteritems():
+			for title, key in songs_key_list.items():
 				if not title in annotated_titles:
 					continue
 				if not key in self.key_title:
 					self.key_title[key] = [title]
 				else:
 					self.key_title[key].append(title)
-		for key, songs in iter(sorted(self.key_title.iteritems())):
+		for key, songs in iter(sorted(self.key_title.items())):
 			logger.info('Key {} :\t{} songs'.format(key, len(songs)))
 	
 	def load_directory(self, directory):

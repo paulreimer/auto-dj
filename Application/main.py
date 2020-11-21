@@ -1,3 +1,5 @@
+from builtins import str
+from builtins import input
 from songcollection import SongCollection
 from tracklister import TrackLister
 from djcontroller import DjController
@@ -29,7 +31,7 @@ if __name__ == '__main__':
 	
 	while(True):
 		try:
-			cmd_split = str.split(raw_input('> : '), ' ')
+			cmd_split = str.split(input('> : '), ' ')
 		except KeyboardInterrupt:
 			logger.info('Goodbye!')
 			break

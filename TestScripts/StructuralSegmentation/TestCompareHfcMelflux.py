@@ -2,7 +2,10 @@
 	Quick script to visualize the difference between the HFC and Melflux ODFs
 '''
 from __future__ import print_function
+from __future__ import division
 
+from builtins import zip
+from past.utils import old_div
 from song import Song
 import sys
 import numpy as np
@@ -33,8 +36,8 @@ for mag,phase in zip(fft_result_mag, fft_result_ang):
 	pool.add('onsets.hfc', odf_hfc(mag, phase))
 	pool.add('onsets.melflux', odf_mel(mag, phase))
 
-a = pool['onsets.hfc'] / max(pool['onsets.hfc'])
-b = pool['onsets.melflux'] / max(pool['onsets.melflux'])
+a = old_div(pool['onsets.hfc'], max(pool['onsets.hfc']))
+b = old_div(pool['onsets.melflux'], max(pool['onsets.melflux']))
 plt.plot(np.linspace(0,1,len(a)), a, c='g')
 plt.plot(np.linspace(0,1,len(b)), -b, c='r')
 plt.show()

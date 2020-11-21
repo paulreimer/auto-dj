@@ -1,3 +1,4 @@
+from builtins import range
 import numpy as np
 from essentia import *
 from essentia.standard import Windowing, Loudness
@@ -13,7 +14,7 @@ def feature_allframes(song, frame_indexer = None):
 	loudness = Loudness()
 	
 	if frame_indexer is None:
-		frame_indexer = range(1,len(beats) - 1) # Exclude first frame, because it has no predecessor to calculate difference with
+		frame_indexer = list(range(1,len(beats) - 1)) # Exclude first frame, because it has no predecessor to calculate difference with
 		
 	# 1 loudness value by default
 	loudness_values = np.zeros((len(beats), 1))

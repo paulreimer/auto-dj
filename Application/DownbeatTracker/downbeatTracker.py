@@ -1,5 +1,10 @@
 from __future__ import print_function
 from __future__ import absolute_import
+from __future__ import division
+from builtins import zip
+from builtins import range
+from builtins import object
+from past.utils import old_div
 import numpy as np
 import sys, os
 from . import featureLoudness, featureMFCC, featureOnsetIntegral, featureOnsetIntegralCsd, featureOnsetIntegralHfc
@@ -7,7 +12,7 @@ from sklearn.externals import joblib	# Model persistence
 
 feature_modules = [featureLoudness, featureMFCC, featureOnsetIntegral, featureOnsetIntegralCsd, featureOnsetIntegralHfc] 
 
-class DownbeatTracker:
+class DownbeatTracker(object):
 	'''
 		Detects the downbeat locations given the beat locations and audio
 	'''
@@ -24,7 +29,7 @@ class DownbeatTracker:
 		for i in range(len(beats) - 1):
 			rms.append(np.sqrt(np.mean(np.square(audio[int(beats[i]) : int(beats[i+1])]))))
 		def adaptive_mean(x, N):
-			return np.convolve(x, [1.0]*int(N), mode='same')/N
+			return old_div(np.convolve(x, [1.0]*int(N), mode='same'),N)
 		rms_adaptive = adaptive_mean(rms, 4)
 		rms_adaptive_max = max(rms_adaptive)
 		
@@ -58,7 +63,7 @@ class DownbeatTracker:
 		trim_start_beat, trim_end_beat = self.trimAudio(audio, beats)
 		indexer_start = max(FRAME_INDEXER_MIN, trim_start_beat)
 		indexer_end = min(FRAME_INDEXER_MAX, trim_end_beat)
-		frame_indexer = range(indexer_start, indexer_end) 
+		frame_indexer = list(range(indexer_start, indexer_end)) 
 				
 		# Calculate the features on every frame in the audio
 		features_cur_file = None
@@ -81,7 +86,7 @@ class DownbeatTracker:
 		sum_log_probas = np.array([[0,0,0,0]], dtype='float64')		
 		permuted_row = [0] * 4
 		
-		for i, j, row in zip(range(len(probas)), np.array(range(len(probas))) % 4, probas):
+		for i, j, row in zip(list(range(len(probas))), np.array(list(range(len(probas)))) % 4, probas):
 			permuted_row[:4-j] = row[j:]
 			permuted_row[4-j:] = row[:j] # element i of permuted_row (i = 0,1,2,3) corresponds to the TRAJECTORY over the song starting with downbeat 0, 1, 2, 3
 			perm_row_np = np.array([permuted_row])

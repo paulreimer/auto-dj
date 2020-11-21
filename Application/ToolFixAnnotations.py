@@ -5,8 +5,15 @@
 	Usage: python ToolFixAnnotations.py path_to_music_directory_1 path_to_music_directory_2 ...
 '''
 from __future__ import print_function
+from __future__ import division
 
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import zip
+from builtins import range
+from past.utils import old_div
 from song import Song
 from songcollection import SongCollection
 import sys
@@ -18,7 +25,7 @@ from essentia import *
 from essentia.standard import *
 import pyaudio
 
-import Tkinter as tk		   #This interface allow us to draw windows
+import tkinter as tk		   #This interface allow us to draw windows
 
 def overlayAudio(audio, beats):
 	onsetMarker = AudioOnsetsMarker(onsets = 1.0*beats)
@@ -109,7 +116,7 @@ class ToolFixAnnotationApp(tk.Tk):
 		song = self.song
 		IBI = 60.0/song.tempo
 		phase = song.phase
-		song.phase = phase - IBI/2 if phase >= IBI/2 else phase + IBI/2
+		song.phase = phase - old_div(IBI,2) if phase >= old_div(IBI,2) else phase + old_div(IBI,2)
 		song.beats = [b - phase + song.phase for b in song.beats]
 		song.downbeats = [b - phase + song.phase for b in song.downbeats]
 		
@@ -197,7 +204,7 @@ class ToolFixAnnotationApp(tk.Tk):
 			b.grid_forget()
 		self.segment_buttons = []
 			
-		for i, segidx, segtype in zip(range(len(self.song.segment_indices)), self.song.segment_indices, self.song.segment_types):
+		for i, segidx, segtype in zip(list(range(len(self.song.segment_indices))), self.song.segment_indices, self.song.segment_types):
 			# Add a label
 			b = tk.Button(self, text="[{}:{}]".format(segidx,segtype), command=lambda i=segidx: self.play_segment(i))
 			self.segment_buttons.append(b)
@@ -219,7 +226,7 @@ class ToolFixAnnotationApp(tk.Tk):
 		print('Saving annotations...')
 		writeAnnotFile(song.dir_, song.title, ANNOT_BEATS_PREFIX, song.beats, {'tempo' : song.tempo , 'phase' : song.phase})
 		writeAnnotFile(song.dir_, song.title, ANNOT_DOWNB_PREFIX, song.downbeats)
-		writeAnnotFile(song.dir_, song.title, ANNOT_SEGMENT_PREFIX, zip(song.segment_indices, song.segment_types))	
+		writeAnnotFile(song.dir_, song.title, ANNOT_SEGMENT_PREFIX, list(zip(song.segment_indices, song.segment_types)))	
 		print('Annotations saved!')
 		
 	def close_window(self):

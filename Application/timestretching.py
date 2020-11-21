@@ -1,3 +1,6 @@
+from __future__ import division
+from builtins import range
+from past.utils import old_div
 import numpy as np
 from scipy import signal, interpolate
 import librosa.effects as effects
@@ -10,7 +13,7 @@ def crossfade(audio1, audio2, length = None):
 	Assumes MONO input'''
 	if length is None:
 		length = min(audio1.size, audio2.size)
-	profile = ((np.arange(0.0, length)) / length)
+	profile = (old_div((np.arange(0.0, length)), length))
 	output = (audio1[:length] * profile[::-1]) + (audio2[:length] * profile)
 	return output[:length]
 	
@@ -45,13 +48,13 @@ def time_stretch_sola(audio, f, sample_rate = 44100, wsola = False):
 		return audio
 	
 	# Initialise time offsets and window lengths
-	frame_len_1 = 4410 if wsola else 4410/8			# Length of a fragment, including overlap at one side; about 100 ms; shouldn't be longer because length of a 16th note is about this period at 175 BPM: otherwise it won't be possible to copy without doubling transients 
-	overlap_len = frame_len_1/8						# About 8 ms
+	frame_len_1 = 4410 if wsola else old_div(4410,8)			# Length of a fragment, including overlap at one side; about 100 ms; shouldn't be longer because length of a 16th note is about this period at 175 BPM: otherwise it won't be possible to copy without doubling transients 
+	overlap_len = old_div(frame_len_1,8)						# About 8 ms
 	frame_len_2 = frame_len_1 + overlap_len			# Length of a fragment, including overlap at both sides
 	frame_len_0 = frame_len_1 - overlap_len			# Length of a fragment, excluding overlaps (unmixed part)
-	next_frame_offset_f =  frame_len_1 / f			# keep as a float to prevent rounding errors
+	next_frame_offset_f =  old_div(frame_len_1, f)			# keep as a float to prevent rounding errors
 	next_frame_offset = int(next_frame_offset_f) 	# keep as a float to prevent rounding errors
-	seek_win_len_half = frame_len_1/16				# window total ~ 21,666 ms
+	seek_win_len_half = old_div(frame_len_1,16)				# window total ~ 21,666 ms
 	
 	def find_matching_frame(frame, theor_center):
 		'''
@@ -73,7 +76,7 @@ def time_stretch_sola(audio, f, sample_rate = 44100, wsola = False):
 	num_samples_out = int(f * audio.size)
 	output = np.zeros(num_samples_out)		# f: stretch factor of audio!; prealloc
 
-	num_frames_out = num_samples_out / frame_len_1
+	num_frames_out = old_div(num_samples_out, frame_len_1)
 	in_ptr_th_f = 0.0
 	in_ptr = 0
 	isLastFrame = False
@@ -121,8 +124,8 @@ def time_stretch_and_pitch_shift(audio, f, semitones=0):
 	audio = time_stretch_hpss(audio, f*semitone_factor)
 	
 	if semitones != 0:
-		x = range(audio.size)
-		x_new = np.linspace(0,audio.size-1,int(audio.size / semitone_factor))
+		x = list(range(audio.size))
+		x_new = np.linspace(0,audio.size-1,int(old_div(audio.size, semitone_factor)))
 		f = interpolate.interp1d(x, audio, kind='quadratic')
 		audio = f(x_new)
 	return audio

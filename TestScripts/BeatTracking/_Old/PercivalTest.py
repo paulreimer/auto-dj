@@ -1,10 +1,12 @@
 from __future__ import print_function
+from __future__ import division
+from past.utils import old_div
 import numpy as np
 from scipy.signal import medfilt
 
 def running_mean(x, N):
     cumsum = np.cumsum(np.insert(x, 0, 0)) 
-    return (cumsum[N:] - cumsum[:-N]) / N 
+    return old_div((cumsum[N:] - cumsum[:-N]), N) 
 
 import sys
 

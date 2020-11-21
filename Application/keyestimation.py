@@ -1,3 +1,6 @@
+from __future__ import division
+from builtins import object
+from past.utils import old_div
 from essentia import *
 from essentia.standard import *
 
@@ -7,14 +10,14 @@ import numpy as np
 	Simple class performing key extraction on song audio
 '''
 
-class KeyEstimator:
+class KeyEstimator(object):
 	
 	def __init__(self):
 		pass
 		
 	def __call__(self, audio):
 		FRAME_SIZE = 2048		# About 1 beats at 172 BPM and 44100 Hz sample rate
-		HOP_SIZE = FRAME_SIZE/2	# About 0.5 beat interval at 172 BPM 
+		HOP_SIZE = old_div(FRAME_SIZE,2)	# About 0.5 beat interval at 172 BPM 
 		
 		spec = Spectrum(size = FRAME_SIZE)
 		specPeaks = SpectralPeaks()

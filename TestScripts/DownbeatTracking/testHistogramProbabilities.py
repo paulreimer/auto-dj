@@ -5,9 +5,13 @@
 	python testHistogramProbabilities ../music/somesong.mp3
 '''
 from __future__ import print_function
+from __future__ import division
 
 # Detect downbeats on every frame of the song and visualise where it made most mistakes
 
+from builtins import zip
+from builtins import range
+from past.utils import old_div
 def entropy(log_loss_vector):
 	return np.sum([-i*np.exp(i) for i in log_loss_vector])
 
@@ -61,12 +65,12 @@ if __name__ == '__main__':
 	
 	downbeatIndex = readDownbeatIndexFromFile(directory, os.path.splitext(filename)[0])
 		
-	for i, j, row in zip(range(len(probas)), np.array(range(len(probas))) % 4, probas):
+	for i, j, row in zip(list(range(len(probas))), np.array(list(range(len(probas)))) % 4, probas):
 		permuted_row[:4-j] = row[j:]
 		permuted_row[4-j:] = row[:j] # element i of permuted_row (i = 0,1,2,3) corresponds to the TRAJECTORY over the song starting with downbeat 0, 1, 2, 3
 		perm_row_np = np.array([permuted_row])
 		sum_log_probas = sum_log_probas + permuted_row
-		sums_log_probas = np.append(sums_log_probas, np.transpose(sum_log_probas)/(sums_log_probas.shape[1]), axis=1)
+		sums_log_probas = np.append(sums_log_probas, old_div(np.transpose(sum_log_probas),(sums_log_probas.shape[1])), axis=1)
 		framewise_predictions = np.append(framewise_predictions, np.transpose(perm_row_np), axis=1)	
 		
 		log_proba_hist_16[i%16] = permuted_row

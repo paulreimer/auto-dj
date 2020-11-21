@@ -1,4 +1,6 @@
 from __future__ import print_function
+from builtins import input
+from builtins import range
 from songcollection import SongCollection
 import pyaudio, csv
 import numpy as np
@@ -69,7 +71,7 @@ if __name__ == '__main__':
 					# Is the segment aligned?
 					cmd = 'blub'
 					while cmd not in commands:
-						cmd = raw_input('')
+						cmd = input('')
 					if cmd == 'y':
 						# correct
 						row.append('1')

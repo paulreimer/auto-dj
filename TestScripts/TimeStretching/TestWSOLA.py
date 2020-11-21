@@ -1,4 +1,7 @@
 from __future__ import print_function
+from __future__ import division
+from builtins import range
+from past.utils import old_div
 import sys
 import numpy as np
 import BeatTracker
@@ -45,9 +48,9 @@ def time_stretch_sola(audio, f, bpm, phase, sample_rate = 44100, fragment_s = 0.
 	overlap_len = 252		# About 8 ms
 	frame_len_2 = frame_len_1 + overlap_len			# Length of a fragment, including overlap at both sides
 	frame_len_0 = frame_len_1 - overlap_len			# Length of a fragment, excluding overlaps (unmixed part)
-	next_frame_offset_f =  frame_len_1 / f			# keep as a float to prevent rounding errors
+	next_frame_offset_f =  old_div(frame_len_1, f)			# keep as a float to prevent rounding errors
 	next_frame_offset = int(next_frame_offset_f) 	# keep as a float to prevent rounding errors
-	seek_win_len_half = int(955) / 2	# window total ~ 21,666 ms
+	seek_win_len_half = old_div(int(955), 2)	# window total ~ 21,666 ms
 	
 	#~ frame_len_1 = int((60./ bpm) * (sample_rate / 8.0))		# Length of a fragment, including overlap at one side; about 40 ms
 	#~ overlap_len = int(frame_len_1 / 5)
@@ -83,7 +86,7 @@ def time_stretch_sola(audio, f, bpm, phase, sample_rate = 44100, fragment_s = 0.
 	num_samples_out = int(f * audio.size)
 	output = np.zeros(num_samples_out)	# Note the definition of f: stretch factor of audio!; prealloc
 	
-	num_frames_out = num_samples_out / frame_len_1
+	num_frames_out = old_div(num_samples_out, frame_len_1)
 	in_ptr_th_f = 0.0		# Theoretical starting point (equidistant intervals)
 	in_ptr = 0
 	isLastFrame = False
@@ -134,7 +137,7 @@ def crossfade(audio1, audio2, start1 = 0, start2 = 0, length = None, method=quad
 	Assumes MONO input'''
 	if(length is None):
 		length = audio1.size
-	profile = np.arange(0.0, len(audio1)) / len(audio1)
+	profile = old_div(np.arange(0.0, len(audio1)), len(audio1))
 	output = (audio1 * profile[::-1]) + (audio2 * profile)
 	return output 
 	
@@ -166,8 +169,8 @@ if __name__ == '__main__':
 	endIndex = int(44100.0 * (phase1 + 600*(60./bpm1)))
 	
 	if(bpm1 != bpm2):
-		print('Time stretching with factor ', bpm1/bpm2)
-		audio_stretched = time_stretch_sola(audio1[beginIndex : endIndex], bpm1/bpm2, bpm1, phase1)
+		print('Time stretching with factor ', old_div(bpm1,bpm2))
+		audio_stretched = time_stretch_sola(audio1[beginIndex : endIndex], old_div(bpm1,bpm2), bpm1, phase1)
 	else:
 		audio_stretched = audio1
 	

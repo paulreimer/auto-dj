@@ -1,4 +1,6 @@
 from __future__ import print_function
+from builtins import input
+from builtins import range
 from songcollection import SongCollection
 import pyaudio, csv
 import numpy as np
@@ -65,7 +67,7 @@ if __name__ == '__main__':
 					
 					cmd = 'blub'
 					while cmd not in commands:
-						cmd = raw_input('Correct annotation? y:yes b:beat wrong d:dbeat wrong s:segment wrong z:seg correct, wrong offset')
+						cmd = input('Correct annotation? y:yes b:beat wrong d:dbeat wrong s:segment wrong z:seg correct, wrong offset')
 					if cmd != 'r':
 						row.append(indices[idx])
 						row.append(cmd)

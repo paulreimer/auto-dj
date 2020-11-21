@@ -1,4 +1,6 @@
 from __future__ import print_function
+from __future__ import division
+from past.utils import old_div
 import sys
 
 import numpy as np
@@ -14,7 +16,7 @@ audio, sr = librosa.load(sys.argv[1], sr=44100)
 audio = audio[START:START + int(sys.argv[2]) * 60480]
 
 FRAME_SIZE = 1024
-HOP_SIZE = FRAME_SIZE/2
+HOP_SIZE = old_div(FRAME_SIZE,2)
 
 #~ spectogram = np.array([np.log(spectrum(w(frame))) for frame in frames])
 spectogram = cqt(audio, sr=44100, bins_per_octave=12, n_bins= 84)

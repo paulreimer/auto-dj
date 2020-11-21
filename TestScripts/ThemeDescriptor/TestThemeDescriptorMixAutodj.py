@@ -9,6 +9,7 @@
 	This file needs to be in the autodj/Applications folder to work, as it uses e.g. the Song and SongCollection class
 '''
 
+from builtins import zip
 from song import Song
 from songcollection import SongCollection
 import sys

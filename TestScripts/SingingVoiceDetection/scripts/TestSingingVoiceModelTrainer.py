@@ -15,7 +15,11 @@
 	25572 4281 (38 test songs)
 '''
 from __future__ import print_function
+from __future__ import division
 
+from builtins import zip
+from builtins import range
+from past.utils import old_div
 from song import Song
 from songcollection import SongCollection
 import sys, os, csv
@@ -246,7 +250,7 @@ if __name__ == '__main__':
 				scores_val_filter_only = []
 				for cur_fold in range(N_folds):
 					print('{} out of {} folds'.format(cur_fold, N_folds))
-					cur_fold_test_files = files[cur_fold*N_files/N_folds:(cur_fold+1)*N_files/N_folds]
+					cur_fold_test_files = files[old_div(cur_fold*N_files,N_folds):old_div((cur_fold+1)*N_files,N_folds)]
 					cur_fold_train_files = [f for f in files if f not in cur_fold_test_files]
 					cur_fold_mask = np.array([t in cur_fold_train_files for t in t_train])
 					

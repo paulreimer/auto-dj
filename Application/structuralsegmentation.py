@@ -1,3 +1,8 @@
+from __future__ import division
+from builtins import zip
+from builtins import range
+from builtins import object
+from past.utils import old_div
 from essentia import *
 from essentia.standard import *
 from sklearn.metrics.pairwise import pairwise_distances
@@ -30,9 +35,9 @@ def calculateCheckerboardCorrelation(matrix, N):
 	return result
 
 def adaptive_mean(x, N):
-	return np.convolve(x, [1.0]*int(N), mode='same')/N
+	return old_div(np.convolve(x, [1.0]*int(N), mode='same'),N)
 
-class StructuralSegmentator:
+class StructuralSegmentator(object):
 	
 	def analyse(self, song): #(audio_in, downbeats, tempo):
 		
@@ -54,8 +59,8 @@ class StructuralSegmentator:
 		
 		# MFCC self-similarity matrix and novelty curve
 		# TODO: These features are also calculated for beat tracking -> can be optimized
-		FRAME_SIZE = int(44100 * (60.0 / tempo) / 2)
-		HOP_SIZE = FRAME_SIZE / 2
+		FRAME_SIZE = int(old_div(44100 * (60.0 / tempo), 2))
+		HOP_SIZE = old_div(FRAME_SIZE, 2)
 		for frame in FrameGenerator(audio, frameSize = FRAME_SIZE, hopSize = HOP_SIZE):
 			mfcc_bands, mfcc_coeffs = mfcc(spectrum(w(frame[:FRAME_SIZE-(FRAME_SIZE % 2)])))
 			pool.add('lowlevel.mfcc', mfcc_coeffs)
@@ -109,7 +114,7 @@ class StructuralSegmentator:
 
 		downbeat_len_s = 4 * 60.0 / tempo
 		delta = 0.4
-		for dbindex, downbeat in zip(range(len(downbeats)), np.array(downbeats) - downbeats[0]):
+		for dbindex, downbeat in zip(list(range(len(downbeats))), np.array(downbeats) - downbeats[0]):
 			# Skip the peaks prior to the acceptance interval
 			while peak_cur_s < downbeat - delta * downbeat_len_s and peak_idx < len(peaks_pos):
 				num_filtered_out += 1
@@ -176,7 +181,7 @@ class StructuralSegmentator:
 		# Determine the type of segment
 		adaptive_mean_rms = adaptive_mean(pool['lowlevel.rms'], 64) # Mean of rms in window of [-4 dbeats, + 4 dbeats]
 		mean_rms = np.mean(adaptive_mean_rms)
-		adaptive_mean_odf = adaptive_mean(song.onset_curve, int((44100*60/tempo)/512) * 4) # -4 dbeats, +4 dbeats
+		adaptive_mean_odf = adaptive_mean(song.onset_curve, int(old_div((old_div(44100*60,tempo)),512)) * 4) # -4 dbeats, +4 dbeats
 		mean_odf = np.mean(adaptive_mean_odf)
 		
 		#~ import matplotlib.pyplot as plt
@@ -194,11 +199,11 @@ class StructuralSegmentator:
 			if dbindex >= last_boundary:
 				return 'L'
 				
-			after_index = int(int((dbindex + 4) * 4 * 60.0/tempo * 44100.0)/HOP_SIZE)	# 2 downbeats after the fade
-			rms_after = adaptive_mean_rms[after_index] / mean_rms
+			after_index = int(old_div(int((dbindex + 4) * 4 * 60.0/tempo * 44100.0),HOP_SIZE))	# 2 downbeats after the fade
+			rms_after = old_div(adaptive_mean_rms[after_index], mean_rms)
 			
-			after_index = int(int((dbindex + 4) * 4 * 60.0/tempo * 44100.0)/512)	# 32 + downbeat index (running average range is [-32,32])
-			odf_after = adaptive_mean_odf[after_index] / mean_odf
+			after_index = int(old_div(int((dbindex + 4) * 4 * 60.0/tempo * 44100.0),512))	# 32 + downbeat index (running average range is [-32,32])
+			odf_after = old_div(adaptive_mean_odf[after_index], mean_odf)
 						
 			return 'H' if rms_after >= 1.0 and odf_after >= 1.0 else 'L'			
 		

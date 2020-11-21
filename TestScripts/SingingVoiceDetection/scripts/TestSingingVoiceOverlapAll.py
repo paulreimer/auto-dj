@@ -1,4 +1,6 @@
 from __future__ import print_function
+from __future__ import division
+from past.utils import old_div
 from song import Song
 from songcollection import SongCollection
 import sys, os, csv
@@ -141,7 +143,7 @@ if __name__ == '__main__':
 			
 			masks[s.title] = (y_val, y_true)
 	
-	for title_1, y_tuple_1 in masks.iteritems():
+	for title_1, y_tuple_1 in masks.items():
 		song_1 = [s for s in sc.get_annotated() if s.title == title_1][0]
 		song_1.open()
 		
@@ -149,11 +151,11 @@ if __name__ == '__main__':
 	confusion_matrix = np.array([[0,0],[0,0]])
 	average_clash_length = 0.0
 	num_clashes = 0
-	for title_1, y_tuple_1 in masks.iteritems():
+	for title_1, y_tuple_1 in masks.items():
 		print(title_1)
 		song_1 = [s for s in sc.get_annotated() if s.title == title_1][0]
 		
-		for title_2, y_tuple_2 in masks.iteritems():
+		for title_2, y_tuple_2 in masks.items():
 			if title_1 == title_2:
 				continue
 			y_val_1, y_true_1 = y_tuple_1
@@ -187,7 +189,7 @@ if __name__ == '__main__':
 						if is_singing_clash == 1 and is_singing_clash_pred == 0:
 							# False negative, which is the worst thing that can happen: an undetected vocal clash.
 							# How long are these on average?
-							average_clash_length += np.sum(np.logical_and(master_singing, slave_singing),dtype='single') / len(master_singing)
+							average_clash_length += old_div(np.sum(np.logical_and(master_singing, slave_singing),dtype='single'), len(master_singing))
 							num_clashes += 1
 						
 						# TODO consider overlapping if number of overlapping downbeats is >= 2?
@@ -202,11 +204,11 @@ if __name__ == '__main__':
 						
 						# TODO save result and report
 	
-		print(average_clash_length / num_clashes)
+		print(old_div(average_clash_length, num_clashes))
 		print(confusion_matrix)
-		print(np.array(confusion_matrix) / np.sum(confusion_matrix,axis=1,dtype='float').reshape((-1,1)))
+		print(old_div(np.array(confusion_matrix), np.sum(confusion_matrix,axis=1,dtype='float').reshape((-1,1))))
 	
-	for title_1, y_tuple_1 in masks.iteritems():
+	for title_1, y_tuple_1 in masks.items():
 		song_1 = [s for s in sc.get_annotated() if s.title == title_1][0]
 		song_1.close()
 

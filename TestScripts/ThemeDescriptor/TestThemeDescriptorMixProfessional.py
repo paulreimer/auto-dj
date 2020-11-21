@@ -1,7 +1,11 @@
 from __future__ import print_function
+from __future__ import division
 # Calculate the Theme Descriptor features for each "odd" (uneven) 30 second segment in a DJ mix
 # This is done to validate that the descriptor indeed describes if music fits together: in a DJ mix, songs surely fit together, so consecutive
 # segments must lie close together in the feature space
+from builtins import zip
+from builtins import range
+from past.utils import old_div
 from essentia import *
 from essentia.standard import *
 import numpy as np
@@ -17,7 +21,7 @@ theme_scaler = joblib.load('song_theme_scaler_2.pkl')
 def calculateThemeDescriptor(audio):
 	
 	FRAME_SIZE = 2048
-	HOP_SIZE = FRAME_SIZE/2
+	HOP_SIZE = old_div(FRAME_SIZE,2)
 
 	spec = Spectrum(size = FRAME_SIZE)
 	w = Windowing(type = 'hann')
@@ -81,7 +85,7 @@ hop_size = 44100 * HOP_S
 pool = Pool()
 
 for idx in range(start_sample, stop_sample - length_samples, hop_size):
-	print('Analysed until {:.2f}'.format((idx/44100.0)/60))
+	print('Analysed until {:.2f}'.format(old_div((idx/44100.0),60)))
 	start_idx = idx
 	end_idx = idx + length_samples
 	fragment = audio[start_idx : end_idx]

@@ -1,3 +1,7 @@
+from __future__ import division
+from builtins import range
+from builtins import object
+from past.utils import old_div
 import numpy as np
 import bisect
 
@@ -23,7 +27,7 @@ import csv
 
 from essentia.standard import MonoWriter
 
-class DjController:
+class DjController(object):
 	
 	def __init__(self, tracklister):
 		self.tracklister = tracklister
@@ -156,7 +160,7 @@ class DjController:
 		if self.pyaudio is None:
 			# Disable output for a while, because pyaudio prints annoying error messages that are irrelevant but that cannot be surpressed :(
 			# http://stackoverflow.com/questions/977840/redirecting-fortran-called-via-f2py-output-in-python/978264#978264
-			null_fds = [os.open(os.devnull, os.O_RDWR) for x in xrange(2)]
+			null_fds = [os.open(os.devnull, os.O_RDWR) for x in range(2)]
 			save = os.dup(1), os.dup(2)
 			os.dup2(null_fds[0], 1)
 			os.dup2(null_fds[1], 2)
@@ -185,7 +189,7 @@ class DjController:
 				return
 				
 			FRAME_LEN = 1024
-			last_frame_start_idx = int(len(toPlay)/FRAME_LEN) * FRAME_LEN
+			last_frame_start_idx = int(old_div(len(toPlay),FRAME_LEN)) * FRAME_LEN
 			for cur_idx in range(0,last_frame_start_idx+1,FRAME_LEN):
 				playEvent.wait()
 				if not self.isPlaying.value:
@@ -217,7 +221,7 @@ class DjController:
 		songs_playing_master = 0
 		
 		def add_song_to_tracklist(master_song, anchor_sample, next_song, next_fade_type, cue_master_out, fade_in_len, fade_out_len):
-			f = master_song.tempo / TEMPO			
+			f = old_div(master_song.tempo, TEMPO)			
 			buffer_in_sample = int(f * (44100 * master_song.downbeats[cue_master_out] - anchor_sample))
 			buffer_switch_sample = int(f * (44100 * master_song.downbeats[cue_master_out] - anchor_sample) + fade_in_len * samples_per_dbeat)
 			buffer_out_sample = int(f * (44100 * master_song.downbeats[cue_master_out] - anchor_sample) + (fade_in_len + fade_out_len) * samples_per_dbeat)
@@ -260,9 +264,9 @@ class DjController:
 		add_song_to_tracklist(current_song, anchor_sample, next_song, next_fade_type, cue_master_out, fade_in_len, fade_out_len)
 		prev_in_or_out = 'in'
 			
-		f = current_song.tempo / TEMPO		
+		f = old_div(current_song.tempo, TEMPO)		
 		current_audio_start = 0
-		current_audio_end = int((current_song.downbeats[cue_master_out] * 44100) + (fade_in_len + fade_out_len + 2)*samples_per_dbeat/f)
+		current_audio_end = int((current_song.downbeats[cue_master_out] * 44100) + old_div((fade_in_len + fade_out_len + 2)*samples_per_dbeat,f))
 		current_audio_stretched = time_stretch_and_pitch_shift(current_song.audio[current_audio_start:current_audio_end], f)
 		
 		mix_buffer = current_audio_stretched
@@ -308,7 +312,7 @@ class DjController:
 			# Go to next song, and select the song after that
 			current_song = next_song
 			current_song.open()
-			f = current_song.tempo / TEMPO	
+			f = old_div(current_song.tempo, TEMPO)	
 			cue_master_in = cue_next_in
 			prev_fade_type = next_fade_type
 			prev_fade_in_len = fade_in_len
@@ -320,10 +324,10 @@ class DjController:
 			add_song_to_tracklist(current_song, anchor_sample, next_song, next_fade_type, cue_master_out, fade_in_len, fade_out_len)	
 			mix_buffer_cf_start_sample = int(f * (current_song.downbeats[cue_master_out] * 44100 - anchor_sample))
 			
-			f = current_song.tempo / TEMPO		
+			f = old_div(current_song.tempo, TEMPO)		
 			current_song.openAudio()
 			current_audio_start = int(current_song.downbeats[cue_master_in] * 44100)
-			current_audio_end = int((current_song.downbeats[cue_master_out] * 44100) + (fade_in_len + fade_out_len + 2)*samples_per_dbeat/f) # 2 downbeats margin
+			current_audio_end = int((current_song.downbeats[cue_master_out] * 44100) + old_div((fade_in_len + fade_out_len + 2)*samples_per_dbeat,f)) # 2 downbeats margin
 			current_audio_stretched = time_stretch_and_pitch_shift(current_song.audio[current_audio_start:current_audio_end], f, semitones=semitone_offset)
 			
 			# Calculate crossfade between *previous* song and current song

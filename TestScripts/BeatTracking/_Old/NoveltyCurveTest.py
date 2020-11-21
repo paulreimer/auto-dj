@@ -1,4 +1,6 @@
 from __future__ import print_function
+from __future__ import division
+from past.utils import old_div
 import sys
 
 # Load a file using the command line
@@ -63,8 +65,8 @@ plt.show()
 # Calculate how stable the BPM is
 delta_beats = beats[1:] - beats[:len(beats)-1]
 BPM = 60. / np.mean(delta_beats)
-lenAudioInMin = (len(audio)/(44100.0 * 60))
-BPM2 = len(beats) / lenAudioInMin
+lenAudioInMin = (old_div(len(audio),(44100.0 * 60)))
+BPM2 = old_div(len(beats), lenAudioInMin)
 BPM_std = np.std(delta_beats)
 print('> BPM = ', BPM, '; using length of file: ', BPM2, '; std = ', BPM_std)
 
@@ -73,14 +75,14 @@ print('> Mean of running mean (low pass filter) of instant BPM: ', np.average(60
 
 # Plot how the beat distances are distributed
 hist, bins = np.histogram(delta_beats, bins = 20)
-valid_bins = np.where(hist >= len(delta_beats)/10)
+valid_bins = np.where(hist >= old_div(len(delta_beats),10))
 print(valid_bins)
 print(bins)
 delta_beats_bin_index = np.digitize(delta_beats, bins) - 1
 delta_beats_filtered = delta_beats[np.in1d(delta_beats_bin_index, valid_bins)]
 delta_beats_filtered_plot = np.where(np.in1d(delta_beats_bin_index, valid_bins), delta_beats, 60./170)
 width = 0.7 * (bins[1] - bins[0])
-center = (bins[:-1] + bins[1:]) / 2
+center = old_div((bins[:-1] + bins[1:]), 2)
 plt.bar(center, hist, align='center', width=width)
 plt.hist(delta_beats_filtered, bins=bins, color='red', width = 0.9*(bins[1]-bins[0]))
 plt.show()

@@ -1,3 +1,7 @@
+from __future__ import division
+from builtins import zip
+from builtins import range
+from past.utils import old_div
 import numpy as np
 from essentia import *
 from essentia.standard import Spectrum, Windowing, OnsetDetection, FrameGenerator
@@ -27,18 +31,18 @@ def feature_allframes(song, frame_indexer = None):
 	
 	# Normalize and half-rectify onset detection curve
 	def adaptive_mean(x, N):
-		return np.convolve(x, [1.0]*int(N), mode='same')/N
+		return old_div(np.convolve(x, [1.0]*int(N), mode='same'),N)
 		
 	novelty_mean = adaptive_mean(pool['onsets.flux'], 16.0)
 	novelty_hwr = (pool['onsets.flux'] - novelty_mean).clip(min=0)	
-	novelty_hwr = novelty_hwr / np.average(novelty_hwr)
+	novelty_hwr = old_div(novelty_hwr, np.average(novelty_hwr))
 	
 	# Save the novelty function, as it is used later for song matching as well
 	song.onset_curve = novelty_hwr
 	
 	# For every frame in frame_indexer, 
 	if frame_indexer is None:
-		frame_indexer = range(4,len(beats) - 1) # Exclude first frame, because it has no predecessor to calculate difference with
+		frame_indexer = list(range(4,len(beats) - 1)) # Exclude first frame, because it has no predecessor to calculate difference with
 		
 	# Feature: correlation between current frame onset detection f and of previous frame
 	# Feature: correlation between current frame onset detection f and of next frame
@@ -51,7 +55,7 @@ def feature_allframes(song, frame_indexer = None):
 		or (i-1 in frame_indexer) or (i-2 in frame_indexer) or (i-3 in frame_indexer)
 		or (i-4 in frame_indexer) or (i-5 in frame_indexer) or (i-6 in frame_indexer) or (i-7 in frame_indexer)]:
 		
-		half_i = int((frame_i[i] + frame_i[i+1]) / 2)
+		half_i = int(old_div((frame_i[i] + frame_i[i+1]), 2))
 		cur_frame_1st_half = novelty_hwr[frame_i[i] : half_i]
 		cur_frame_2nd_half = novelty_hwr[half_i : frame_i[i+1]]
 		onset_integrals[2*i] = np.sum(cur_frame_1st_half)

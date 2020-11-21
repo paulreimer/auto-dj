@@ -1,4 +1,8 @@
 from __future__ import print_function
+from __future__ import division
+from builtins import zip
+from builtins import range
+from past.utils import old_div
 import numpy as np
 import sys, os
 import csv, time
@@ -66,7 +70,7 @@ def local_maxima(a):
 	'''
 	
 	local_max_indexer = np.r_[a[0] > a[len(a)-1], a[1:] > a[:-1]] & np.r_[a[:-1] > a[1:], a[0] < a[len(a)-1]]
-	indices_tmp = np.array(range(len(a)))
+	indices_tmp = np.array(list(range(len(a))))
 	indices_tmp = indices_tmp[local_max_indexer]
 	indices = indices_tmp
 	#~ indices = indices_tmp
@@ -85,7 +89,7 @@ def local_maxima(a):
 			#~ indices.append(i)
 	
 	values = a[indices]
-	zipped = zip(indices, values)
+	zipped = list(zip(indices, values))
 	zipped.sort(key= lambda t: t[1])
 	return zipped
 	
@@ -115,7 +119,7 @@ with open('./figures/evaluation_localmaxima'+timestr+'.csv', 'wb') as csvfile:
 			fft_result_mag = np.absolute(fft_result)
 			fft_result_ang = np.angle(fft_result)
 						
-			for od_str, od_f in od.iteritems():
+			for od_str, od_f in od.items():
 				#~ if os.path.exists('./figures/'+f+'.png'):
 					#~ continue
 					
@@ -132,7 +136,7 @@ with open('./figures/evaluation_localmaxima'+timestr+'.csv', 'wb') as csvfile:
 
 				# Subtract adaptive mean and HWR it
 				def adaptive_mean(x, N):
-					return np.convolve(x, [1.0]*int(N), mode='same')/N
+					return old_div(np.convolve(x, [1.0]*int(N), mode='same'),N)
 					
 				novelty_mean = adaptive_mean(pool['onsets.'+od_str], 16.0)
 				novelty_hwr = (pool['onsets.'+od_str] - novelty_mean).clip(min=0)  
@@ -140,16 +144,16 @@ with open('./figures/evaluation_localmaxima'+timestr+'.csv', 'wb') as csvfile:
 				# Calculate autocorrelation
 				def autocorr(x):
 					result = np.correlate(x, x, mode='full')
-					return result[result.size/2:]
+					return result[old_div(result.size,2):]
 
 				novelty_autocorr = autocorr(novelty_hwr)
 
 				# Apply shift-invariant comb filterbank
 				valid_bpms = np.arange(MIN_VALID_BPM, MAX_VALID_BPM, 0.01)
 				for bpm in valid_bpms:
-					num_frames_per_beat = (60.0 * 44100.0)/(512.0 * bpm) 
+					num_frames_per_beat = old_div((60.0 * 44100.0),(512.0 * bpm)) 
 					frames = (np.round(np.arange(0,np.size(novelty_autocorr),num_frames_per_beat)).astype('int'))[:-1] # Discard last value to prevent reading beyond array (last value rounded up for example)
-					pool.add('output.'+ od_str +'.bpm', np.sum(novelty_autocorr[frames])/np.size(frames))
+					pool.add('output.'+ od_str +'.bpm', old_div(np.sum(novelty_autocorr[frames]),np.size(frames)))
 
 				bpm = valid_bpms[np.argmax(pool['output.'+od_str+'.bpm'])]
 
@@ -161,13 +165,13 @@ with open('./figures/evaluation_localmaxima'+timestr+'.csv', 'wb') as csvfile:
 
 				# Calculate phase
 				valid_phases = np.arange(0.0, 60.0/bpm, 0.001)
-				num_frames_per_beat = (60.0 * 44100.0)/(512.0 * bpm)
+				num_frames_per_beat = old_div((60.0 * 44100.0),(512.0 * bpm))
 
 				for phase in valid_phases:
 					# Convert phase from seconds to frames
-					phase_frames = (phase * 44100.0) / (512.0)
+					phase_frames = old_div((phase * 44100.0), (512.0))
 					frames = (np.round(np.arange(phase_frames,np.size(novelty_hwr),num_frames_per_beat)).astype('int'))[:-1] # Discard last value to prevent reading beyond array (last value rounded up for example)
-					pool.add('output.'+od_str+'.phase', np.sum(novelty_hwr[frames])/np.size(frames))  
+					pool.add('output.'+od_str+'.phase', old_div(np.sum(novelty_hwr[frames]),np.size(frames)))  
 
 				phase = valid_phases[np.argmax(pool['output.' + od_str + '.phase'])]
 				
@@ -207,7 +211,7 @@ with open('./figures/evaluation_localmaxima'+timestr+'.csv', 'wb') as csvfile:
 						dist = min(dist, len(valid_phases) - dist)						
 						
 						phase_localmaxima_i[od_str].append(float(dist) / len(valid_phases))
-						phase_localmaxima_val[od_str].append(peak_val / max_peak_val)
+						phase_localmaxima_val[od_str].append(old_div(peak_val, max_peak_val))
 						
 				i = i+1
 				
@@ -221,7 +225,7 @@ with open('./figures/evaluation_localmaxima'+timestr+'.csv', 'wb') as csvfile:
 		
 		# Plot this for all songs together		
 	if True:
-		for od_str, od_f in od.iteritems():
+		for od_str, od_f in od.items():
 			plt.figure()
 			plt.title(od_str)
 			plt.scatter(phase_localmaxima_i[od_str], phase_localmaxima_val[od_str], marker = 'o')

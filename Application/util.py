@@ -1,3 +1,4 @@
+from builtins import str
 import os, csv
 import numpy as np
 from essentia import *
@@ -89,7 +90,7 @@ def writeAnnotFile(directory, song_title, prefix, array, values_dict = {}):
 	output_file = pathAnnotationFile(directory, song_title, prefix)	
 	with open(output_file, 'w+') as f:
 		# Write the dict
-		for key, value in values_dict.iteritems():
+		for key, value in values_dict.items():
 			f.write('#' + str(key) + ' ' + '{:.9f}'.format(value) + '\n')
 		# Write the annotations
 		for value in array:

@@ -1,4 +1,7 @@
 from __future__ import print_function
+from __future__ import division
+from builtins import range
+from past.utils import old_div
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
@@ -168,7 +171,7 @@ random_traj_dj_scores = np.zeros(N,dtype='float')
 
 import itertools
 userscores_filtered = userscores[[i for i in range(n) if not i in excluded_list],:]
-allpaths = itertools.product(range(3), repeat=n-len(excluded_list))
+allpaths = itertools.product(list(range(3)), repeat=n-len(excluded_list))
 pathscores = np.zeros(3**(n-len(excluded_list)))
 i = 0
 #print(allpaths)
@@ -182,7 +185,7 @@ for curpath in allpaths:
 #print(pathscores)
 dj_path_score = np.mean([userscores[v][djtraj[v]] for v in range(n) if not v in excluded_list])
 print(dj_path_score)
-print((1+np.sum(pathscores < dj_path_score)) / (1+len(pathscores)))
+print(old_div((1+np.sum(pathscores < dj_path_score)), (1+len(pathscores))))
 
 font = {'family' : 'normal',
         'weight' : 'bold',

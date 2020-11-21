@@ -2,8 +2,14 @@
 	Initial test script for structural segmentation
 '''
 from __future__ import print_function
+from __future__ import division
 
 
+from builtins import zip
+from builtins import str
+from builtins import range
+from past.utils import old_div
+from builtins import object
 from essentia import *
 from essentia.standard import *
 from sklearn.metrics.pairwise import pairwise_distances
@@ -55,13 +61,13 @@ def writeAnnotFile(directory, song_title, prefix, array, values_dict = {}):
 	output_file = pathAnnotationFile(directory, song_title, prefix)	
 	with open(output_file, 'w+') as f:
 		# Write the dict
-		for key, value in values_dict.iteritems():
+		for key, value in values_dict.items():
 			f.write('#' + str(key) + ' ' + '{:.9f}'.format(value) + '\n')
 		# Write the annotations
 		for value in array:
 			f.write("{:.9f}".format(value) + '\n')
 
-class Song:
+class Song(object):
 	
 	def __init__(self, path_to_file):
 		
@@ -153,7 +159,7 @@ def calculateCheckerboardCorrelation(matrix, N):
 	return result
 
 def adaptive_mean(x, N):
-	return np.convolve(x, [1.0]*int(N), mode='same')/N
+	return old_div(np.convolve(x, [1.0]*int(N), mode='same'),N)
 	
 '''
 Construct self-similarity matrices with bar-length frames.
@@ -188,8 +194,8 @@ audio = audio[ first_downbeat_sample : ]
 
 # MFCC self-similarity matrix and novelty curve
 # TODO: These features are also calculated for beat tracking -> can be optimized
-FRAME_SIZE = int(44100 * (60.0 / song.tempo) / 2)
-HOP_SIZE = FRAME_SIZE / 2
+FRAME_SIZE = int(old_div(44100 * (60.0 / song.tempo), 2))
+HOP_SIZE = old_div(FRAME_SIZE, 2)
 for frame in FrameGenerator(audio, frameSize = FRAME_SIZE, hopSize = HOP_SIZE):
 	mfcc_bands, mfcc_coeffs = mfcc(spectrum(w(frame[:FRAME_SIZE-(FRAME_SIZE % 2)])))
 	pool.add('lowlevel.mfcc', mfcc_coeffs)
@@ -240,7 +246,7 @@ num_filtered_out = 0
 downbeat_len_s = 4 * 60.0 / song.tempo
 delta = 0.4
 print(len(peaks_pos), peaks_pos[-1] * HOP_SIZE / float(len(audio)))
-for dbindex, downbeat in zip(range(len(song.downbeats)), np.array(song.downbeats) - song.downbeats[0]):
+for dbindex, downbeat in zip(list(range(len(song.downbeats))), np.array(song.downbeats) - song.downbeats[0]):
 	# Skip the peaks prior to the acceptance interval
 	while peak_cur_s < downbeat - delta * downbeat_len_s and peak_idx < len(peaks_pos):
 		num_filtered_out += 1
@@ -299,7 +305,7 @@ for i in range(8): #highest_peaks_db_indices:
 
 # For the positions where the highest downbeats are detected, determine which one has the most alignments
 # Discard the peaks where no highest peak has been detected
-print(distances8 * np.array([p / sum(distances8_high) if p > 0 else 0 for p in distances8_high]))
+print(distances8 * np.array([old_div(p, sum(distances8_high)) if p > 0 else 0 for p in distances8_high]))
 most_likely_8db_index = np.argmax(distances8 * np.array([float(p) / sum(distances8_high) if p > 0 else 0 for p in distances8_high]))
 print(distances, distances_high)
 print(distances8, distances8_high)
@@ -326,8 +332,8 @@ segment_types = []
 def getSegmentType(dbindex):
 	before_index = int((dbindex - 4) * 4 * 60.0/song.tempo * 44100.0/HOP_SIZE)	# 2 downbeats before the fade
 	after_index = int((dbindex + 4) * 4 * 60.0/song.tempo * 44100.0/HOP_SIZE)		# 2 downbeats after the fade
-	rms_before = adaptive_mean_rms[before_index] / mean_rms
-	rms_after = adaptive_mean_rms[after_index] / mean_rms
+	rms_before = old_div(adaptive_mean_rms[before_index], mean_rms)
+	rms_after = old_div(adaptive_mean_rms[after_index], mean_rms)
 	return 'L' if rms_after < 1.0 else 'H'			
 
 for segment in segment_indices:
@@ -363,9 +369,9 @@ recurrencePlot = False
 if recurrencePlot:
 	
 	# --- HPCP features	
-	FRAME_SIZE_2 = int(44100 * (60.0 / song.tempo) / 2)
-	print(44100 * (60.0 / song.tempo) / 2)
-	HOP_SIZE_2 = FRAME_SIZE_2 / 2
+	FRAME_SIZE_2 = int(old_div(44100 * (60.0 / song.tempo), 2))
+	print(old_div(44100 * (60.0 / song.tempo), 2))
+	HOP_SIZE_2 = old_div(FRAME_SIZE_2, 2)
 	for frame in FrameGenerator(audio, frameSize = FRAME_SIZE_2, hopSize = HOP_SIZE_2):
 		freqs, mags = speaks(spectrum(w(frame[:FRAME_SIZE_2-(FRAME_SIZE_2 % 2)])))
 		mfcc_coeffs = hpcp(freqs, mags)
@@ -412,10 +418,10 @@ if recurrencePlot:
 plt.figure()
 plt.imshow(selfsim_mfcc, aspect='auto', interpolation='none', vmin=-3.5, vmax=np.max(selfsim_mfcc))
 range_in_sec = np.linspace(0, len(audio) / 44100.0, selfsim_mfcc.shape[0])
-len_song_sec = len(audio) / 44100
-xticks = np.linspace(0,selfsim_mfcc.shape[0], len_song_sec / 20)
-plt.xticks(xticks, range(0,len_song_sec, 20), fontsize='large')
-plt.yticks(xticks, range(0,len_song_sec, 20), fontsize='large')
+len_song_sec = old_div(len(audio), 44100)
+xticks = np.linspace(0,selfsim_mfcc.shape[0], old_div(len_song_sec, 20))
+plt.xticks(xticks, list(range(0,len_song_sec, 20)), fontsize='large')
+plt.yticks(xticks, list(range(0,len_song_sec, 20)), fontsize='large')
 plt.xlabel('Time (s)',fontsize=16)
 plt.ylabel('Time (s)',fontsize=16)
 ax = plt.gca()
@@ -440,7 +446,7 @@ x_a = np.linspace(0,1,len(novelty_mfcc))
 x_b = np.linspace(0,1,len(novelty_rms))
 x_audio = np.linspace(0,1,len(audio[::441]))
 x_rms = np.linspace(0,1,len(pool['lowlevel.rms']))
-x_beats = np.linspace(0,1,len(audio)/100)
+x_beats = np.linspace(0,1,old_div(len(audio),100))
 if recurrencePlot:
 	x_e = np.linspace(0,e_length_fraction, len(e))
 

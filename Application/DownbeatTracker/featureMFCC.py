@@ -1,3 +1,4 @@
+from builtins import range
 import numpy as np
 from essentia import *
 from essentia.standard import Spectrum, Windowing, MelBands, FrameGenerator, Spectrum
@@ -22,7 +23,7 @@ def feature_allframes(song, frame_indexer = None):
 	pool = Pool()
 	
 	if frame_indexer is None:
-		frame_indexer = range(4,len(beats) - 1) # Exclude first frame, because it has no predecessor to calculate difference with
+		frame_indexer = list(range(4,len(beats) - 1)) # Exclude first frame, because it has no predecessor to calculate difference with
 		
 	# 13 MFCC coefficients
 	# 40 Mel band energies

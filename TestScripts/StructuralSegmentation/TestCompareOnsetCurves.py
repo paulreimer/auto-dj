@@ -2,8 +2,10 @@
 Quick test script to test the song similarity method using the DTW algorithm
 '''
 from __future__ import print_function
+from __future__ import division
 
 # Test if saving the onset curve worked
+from past.utils import old_div
 from song import Song
 import matplotlib.pyplot as plt
 import numpy as np
@@ -43,9 +45,9 @@ print('bc', calculateOnsetSimilarity(b,c))
 
 
 plt.plot(np.linspace(0,1,L-2), a[:L-2],c='grey')
-plt.plot(np.linspace(0,s2.tempo/s1.tempo,L-2), -b[:L-2],c='grey')
+plt.plot(np.linspace(0,old_div(s2.tempo,s1.tempo),L-2), -b[:L-2],c='grey')
 #~ plt.plot(np.linspace(0,1,len(baudio)), baudio, c='blue')
-plt.plot(np.linspace(0,s2.tempo/s1.tempo,L-2), -c[:L-2],c='grey')
+plt.plot(np.linspace(0,old_div(s2.tempo,s1.tempo),L-2), -c[:L-2],c='grey')
 #~ plt.plot(np.sqrt(a[:L-2]*b[:L-2]), color='b')
 #~ plt.plot(np.sqrt(a[:L-2]*b[1:L-1]), color='g')
 #~ plt.plot(np.sqrt(a[1:L-1]*b[:L-2]), color='r')

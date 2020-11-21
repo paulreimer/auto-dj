@@ -1,4 +1,8 @@
 from __future__ import print_function
+from __future__ import division
+from builtins import range
+from builtins import object
+from past.utils import old_div
 import numpy as np
 import sys
 from essentia import *
@@ -6,7 +10,7 @@ from essentia.standard import Spectrum, Windowing, CartesianToPolar, OnsetDetect
 
 import matplotlib.pyplot as plt
 
-class BeatTracker:
+class BeatTracker(object):
 	'''Detects the BPM, phase and locations of the beats for the given input audio'''
 	
 	def __init__(self, minBpm = 100.0, maxBpm = 199.0, stepBpm = 0.01, FRAME_SIZE = 1024, HOP_SIZE = 512, SAMPLE_RATE = 44100.0, ):
@@ -59,15 +63,15 @@ class BeatTracker:
 		
 		
 	def numFramesPerBeat(self, bpm):
-		return (60.0 * self.SAMPLE_RATE)/(self.HOP_SIZE * bpm)	
+		return old_div((60.0 * self.SAMPLE_RATE),(self.HOP_SIZE * bpm))	
 				
 	def autocorr(self, x):
 		result = np.correlate(x, x, mode='full')
-		return result[result.size/2:]
+		return result[old_div(result.size,2):]
 		
 	def adaptive_mean(self, x, N):
 		#TODO efficient implementation instead of convolve
-		return np.convolve(x, [1.0]*int(N), mode='same')/N	
+		return old_div(np.convolve(x, [1.0]*int(N), mode='same'),N)	
 
 	def run(self, audio):	
 			
@@ -101,21 +105,21 @@ class BeatTracker:
 		valid_bpms = np.arange(self.minBpm, self.maxBpm, self.stepBpm)
 		for bpm in valid_bpms:
 			frames = (np.round(np.arange(0,np.size(novelty_autocorr), self.numFramesPerBeat(bpm))).astype('int'))[:-1] # Discard last value to prevent reading beyond array (last value rounded up for example)
-			pool.add('output.bpm', np.sum(novelty_autocorr[frames])/np.size(frames))  
+			pool.add('output.bpm', old_div(np.sum(novelty_autocorr[frames]),np.size(frames)))  
 		bpm = valid_bpms[np.argmax(pool['output.bpm'])]
 
 		# Step 5: Calculate phase information
 		valid_phases = np.arange(0.0, 60.0/bpm, 0.001) # Valid phases in SECONDS
 		for phase in valid_phases:
 			# Convert phase from seconds to frames
-			phase_frames = (phase * 44100.0) / (512.0)
+			phase_frames = old_div((phase * 44100.0), (512.0))
 			frames = (np.round(np.arange(phase_frames,np.size(novelty_hwr), self.numFramesPerBeat(bpm))).astype('int'))[:-1] # Discard last value to prevent reading beyond array (last value rounded up for example)
-			pool.add('output.phase', np.sum(novelty_hwr[frames])/np.size(frames))
+			pool.add('output.phase', old_div(np.sum(novelty_hwr[frames]),np.size(frames)))
 		phase = valid_phases[np.argmax(pool['output.phase'])]
 		print('PHASE', phase)
 		# Step 6: Determine the beat locations
 		spb = 60./bpm #seconds per beat
-		beats = (np.arange(phase, (np.size(audio)/44100) - spb + phase, spb).astype('single'))
+		beats = (np.arange(phase, (old_div(np.size(audio),44100)) - spb + phase, spb).astype('single'))
 		
 		# Store all the results
 		self.bpm = bpm
@@ -150,9 +154,9 @@ class BeatTracker:
 		
 		# Step 7 (experimental): Determine downbeat locations as subsequence with highest complex spectral difference
 		for i in range(4):
-			phase_frames = (phase * 44100.0) / (512.0)
+			phase_frames = old_div((phase * 44100.0), (512.0))
 			frames = (np.round(np.arange(phase_frames + i * self.numFramesPerBeat(bpm), np.size(novelty_hwr), 4 * self.numFramesPerBeat(bpm))).astype('int'))[:-1] # Discard last value to prevent reading beyond array (last value rounded up for example)
-			pool.add('output.downbeat', np.sum(novelty_hwr[frames])/np.size(frames))
+			pool.add('output.downbeat', old_div(np.sum(novelty_hwr[frames]),np.size(frames)))
 			
 			plt.subplot(4,1,i + 1)
 			plt.plot(novelty_hwr)

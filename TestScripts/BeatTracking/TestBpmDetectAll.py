@@ -1,4 +1,6 @@
 from __future__ import print_function
+from __future__ import division
+from past.utils import old_div
 import numpy as np
 import sys
 import os
@@ -55,7 +57,7 @@ for f in os.listdir("."):
 		print('Normalising result and half-wave rectifying it...')
 		def adaptive_mean(x, N):
 			#TODO efficient implementation instead of convolve
-			return np.convolve(x, [1.0]*int(N), mode='same')/N
+			return old_div(np.convolve(x, [1.0]*int(N), mode='same'),N)
 			
 		novelty_mean = adaptive_mean(pool['onsets.complex'], 16.0)
 		# Step 2: half-wave rectify the result
@@ -67,7 +69,7 @@ for f in os.listdir("."):
 		print('Autocorrelating resulting curve...')
 		def autocorr(x):
 			result = np.correlate(x, x, mode='full')
-			return result[result.size/2:]
+			return result[old_div(result.size,2):]
 
 		novelty_autocorr = autocorr(novelty_hwr)
 		plt.subplot(413)
@@ -78,9 +80,9 @@ for f in os.listdir("."):
 		print('Iterating over valid BPM values...')
 		valid_bpms = np.arange(170.0, 176.0, 0.01)
 		for bpm in valid_bpms:
-			num_frames_per_beat = (60.0 * 44100.0)/(512.0 * bpm)
+			num_frames_per_beat = old_div((60.0 * 44100.0),(512.0 * bpm))
 			frames = (np.round(np.arange(0,np.size(novelty_autocorr),num_frames_per_beat)).astype('int'))[:-1] # Discard last value to prevent reading beyond array (last value rounded up for example)
-			pool.add('output.bpm', np.sum(novelty_autocorr[frames])/np.size(frames))
+			pool.add('output.bpm', old_div(np.sum(novelty_autocorr[frames]),np.size(frames)))
 
 		plt.subplot(414)
 		plt.plot(valid_bpms, pool['output.bpm'])   

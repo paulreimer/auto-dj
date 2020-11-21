@@ -6,7 +6,13 @@
 	
 '''
 from __future__ import print_function
+from __future__ import division
 
+from builtins import zip
+from builtins import next
+from builtins import str
+from builtins import range
+from past.utils import old_div
 import numpy as np
 import sys, os, importlib, time
 import csv
@@ -124,7 +130,7 @@ def trimAudio(audio, beats):
 	for i in range(len(beats) - 1):
 		rms.append(np.sqrt(np.mean(np.square(audio[int(beats[i]) : int(beats[i+1])]))))
 	def adaptive_mean(x, N):
-		return np.convolve(x, [1.0]*int(N), mode='same')/N
+		return old_div(np.convolve(x, [1.0]*int(N), mode='same'),N)
 	rms_adaptive = adaptive_mean(rms, 4)
 	rms_adaptive_max = max(rms_adaptive)
 	
@@ -167,7 +173,7 @@ def getFeaturesForFile(directory, file_name, feature_modules, forceRecalculateFe
 	trim_start_beat, trim_end_beat = trimAudio(audio, beats)
 	indexer_start = max(FRAME_INDEXER_MIN, trim_start_beat)
 	indexer_end = min(FRAME_INDEXER_MAX, trim_end_beat)
-	frame_indexer = range(indexer_start, indexer_end) # -9 instead of -8 to prevent out-of-bound in featureLoudness
+	frame_indexer = list(range(indexer_start, indexer_end)) # -9 instead of -8 to prevent out-of-bound in featureLoudness
 	# Uncomment the line below to test without audio cropping
 	#~ frame_indexer = range(FRAME_INDEXER_MIN, FRAME_INDEXER_MAX) # -9 instead of -8 to prevent out-of-bound in featureLoudness
 	
@@ -177,7 +183,7 @@ def getFeaturesForFile(directory, file_name, feature_modules, forceRecalculateFe
 	# The label that we use here is the classification label of the first full beat of the song. If the first beat of the song is the third beat in the measure, then the label is '2'
 	# There will thus be difference in label if the downbeat index is 1, then classification label will be 3 and vice versa
 	label = (4 - readDownbeatIndexFromFile(directory, song_title)) % 4
-	labels_cur_file = np.tile(np.mod(range(label,label+4), 4), int(np.ceil(len(beats) / 4.0)))[frame_indexer]
+	labels_cur_file = np.tile(np.mod(list(range(label,label+4)), 4), int(np.ceil(len(beats) / 4.0)))[frame_indexer]
 	
 	# Calculate the features on every frame in the audio
 	features_cur_file = None
@@ -264,11 +270,11 @@ if __name__ == '__main__':
 	for arg in sys.argv[2:]:
 		if arg[:2] == '--':
 			# Parse option
-			if arg in options.keys():
+			if arg in list(options.keys()):
 				options[arg] = True
 			else:
 				print(arg + ' is not a valid option!')
-				print('Options: ' + str(options.keys()))
+				print('Options: ' + str(list(options.keys())))
 				exit()
 		else:
 			# Parse feature module
@@ -383,7 +389,7 @@ if __name__ == '__main__':
 		sum_log_probas = np.array([0,0,0,0], dtype='float64')
 		permuted_row = [0] * 4
 		
-		for j, row in zip( np.array(range(len(probas))) % 4, probas):
+		for j, row in zip( np.array(list(range(len(probas)))) % 4, probas):
 			permuted_row[:4-j] = row[j:]
 			permuted_row[4-j:] = row[:j]
 			sum_log_probas += permuted_row
@@ -405,7 +411,7 @@ if __name__ == '__main__':
 		
 		sum_log_probas = np.array([0,0,0,0], dtype='float64')
 		permuted_row = [0] * 4
-		for j, row in zip( np.array(range(len(probas))) % 4, probas):
+		for j, row in zip( np.array(list(range(len(probas)))) % 4, probas):
 			permuted_row[:4-j] = row[j:]
 			permuted_row[4-j:] = row[:j]
 			sum_log_probas += permuted_row
